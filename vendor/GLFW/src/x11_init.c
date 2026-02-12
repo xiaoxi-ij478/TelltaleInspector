@@ -1121,11 +1121,10 @@ Cursor _glfwCreateNativeCursorX11(const GLFWimage* image, int xhot, int yhot)
     return cursor;
 }
 
-
 //////////////////////////////////////////////////////////////////////////
 //////                       GLFW platform API                      //////
 //////////////////////////////////////////////////////////////////////////
-
+static void ______X11_ttite_bar(_GLFWwindow*,GLFWbool){}
 GLFWbool _glfwConnectX11(int platformID, _GLFWplatform* platform)
 {
     const _GLFWplatform x11 =
@@ -1204,6 +1203,7 @@ GLFWbool _glfwConnectX11(int platformID, _GLFWplatform* platform)
         _glfwWaitEventsX11,
         _glfwWaitEventsTimeoutX11,
         _glfwPostEmptyEventX11,
+        ______X11_ttite_bar,
         _glfwGetEGLPlatformX11,
         _glfwGetEGLNativeDisplayX11,
         _glfwGetEGLNativeWindowX11,

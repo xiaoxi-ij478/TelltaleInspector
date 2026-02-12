@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="ImGui" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/ImGui" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Debug/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/ImGui" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Release/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-w" />
+			<Add option="-std=c++17" />
+		</Compiler>
+		<Unit filename="crude_json.cpp" />
+		<Unit filename="crude_json.h" />
+		<Unit filename="imconfig.h" />
+		<Unit filename="imgui.cpp" />
+		<Unit filename="imgui.h" />
+		<Unit filename="imgui_bezier_math.h" />
+		<Unit filename="imgui_canvas.cpp" />
+		<Unit filename="imgui_canvas.h" />
+		<Unit filename="imgui_demo.cpp" />
+		<Unit filename="imgui_draw.cpp" />
+		<Unit filename="imgui_extra_math.h" />
+		<Unit filename="imgui_internal.h" />
+		<Unit filename="imgui_node_editor.cpp" />
+		<Unit filename="imgui_node_editor.h" />
+		<Unit filename="imgui_node_editor_api.cpp" />
+		<Unit filename="imgui_node_editor_internal.h" />
+		<Unit filename="imgui_tables.cpp" />
+		<Unit filename="imgui_widgets.cpp" />
+		<Unit filename="imstb_rectpack.h" />
+		<Unit filename="imstb_textedit.h" />
+		<Unit filename="imstb_truetype.h" />
+		<Extensions>
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

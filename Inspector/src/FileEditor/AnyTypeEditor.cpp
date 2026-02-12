@@ -6,6 +6,7 @@
 #include "../nfd.h"
 #include "imgui_internal.h"
 
+#define MessageBoxA(a,b,c,d)puts(b)
 // Base UI for PROPS and any type viewer with ImGui
 
 bool AnyTypeEditor::Math(u64 hash, void* pInst) {
@@ -184,7 +185,7 @@ bool AnyTypeEditor::modify_handle(MetaClassDescription* desc, Symbol& sym, const
 			else
 				mh_inputField = "";
 		}
-		if ((mh_inputField.empty() || mh_inputField._Starts_with("Symbol<")) && pExtraPossibleValues != 0) {
+		if ((mh_inputField.empty() || starts_with(mh_inputField.c_str(),"Symbol<")) && pExtraPossibleValues != 0) {
 			for (auto it = pExtraPossibleValues->begin(); it != pExtraPossibleValues->end(); it++) {
 				if (CRC64_CaseInsensitive(0, it->c_str()) == sym.GetCRC()) {
 					mh_inputField = *it;
@@ -202,7 +203,7 @@ bool AnyTypeEditor::modify_handle(MetaClassDescription* desc, Symbol& sym, const
 			ImGui::SameLine();
 			if (ImGui::BeginCombo("##mbsel", mh_comboitem)) {
 				for (auto it = possible.begin(); it != possible.end(); it++) {
-					if (em || it->_Starts_with(mh_inputField)) {
+					if (em || starts_with(it->c_str(),mh_inputField.c_str())) {
 						if (ImGui::Selectable(it->c_str())) {
 							mh_inputField = *it;
 						}
@@ -539,7 +540,7 @@ void AnyTypeEditor::TreeItem(MetaClassDescription* clazz, void* pRawData, std::s
 				ImGui::TableSetColumnIndex(1);
 
 				if (IsType(clazz, "PropertySet")) {
-					PropTree((PropertySet*)pRawData, kn->c_str(), (int)pRawData & 0x7FFFFFF);
+					PropTree((PropertySet*)pRawData, kn->c_str(), (long long)pRawData & 0x7FFFFFF);
 					if (hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenOverlapped))
 						ImGui::SetTooltip("Type: %s", clazz->mpTypeInfoName);
 				}
@@ -549,7 +550,7 @@ void AnyTypeEditor::TreeItem(MetaClassDescription* clazz, void* pRawData, std::s
 					if (pElementType == nullptr)
 						goto enum_string;
 					int selected = 0;
-					int result = ListTree(kn->c_str(), (int)pRawData & 0x7FFFFFF, pProxyArray, &DCArray_PropGetter, pProxyArray->GetSize(), pElementType, &selected);
+					int result = ListTree(kn->c_str(), (long long)pRawData & 0x7FFFFFF, pProxyArray, &DCArray_PropGetter, pProxyArray->GetSize(), pElementType, &selected);
 					if (hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenOverlapped))
 						ImGui::SetTooltip("(DC) Array of: %s", pElementType->mpTypeInfoName);
 					else if (result != 2)
@@ -582,7 +583,7 @@ void AnyTypeEditor::TreeItem(MetaClassDescription* clazz, void* pRawData, std::s
 					if (pElementType == nullptr)
 						goto enum_string;
 					int selected = 0;
-					int result = ListTree(kn->c_str(), (int)pRawData & 0x7FFFFFF, pProxyArray, &SArray_PropGetter, pProxyArray->NUM_DATA_ELEM, pElementType, &selected);
+					int result = ListTree(kn->c_str(), (long long)pRawData & 0x7FFFFFF, pProxyArray, &SArray_PropGetter, pProxyArray->NUM_DATA_ELEM, pElementType, &selected);
 					if (hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenOverlapped))
 						ImGui::SetTooltip("(S) Array of: %s", pElementType->mpTypeInfoName);
 				}
@@ -590,7 +591,7 @@ void AnyTypeEditor::TreeItem(MetaClassDescription* clazz, void* pRawData, std::s
 					Map<void*, void*>* pProxyArray = (Map<void*, void*>*)pRawData;
 					if (MapTreeKey(pProxyArray->GetContainerKeyClassDescription(), 0, 0)) {
 						int selected = 0;
-						int result = MapTree(kn->c_str(), (int)pRawData & 0x7FFFFFF, &selected, pProxyArray);
+						int result = MapTree(kn->c_str(), (long long)pRawData & 0x7FFFFFF, &selected, pProxyArray);
 						if (hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenOverlapped)) {
 							ImGui::SetTooltip("Map of: %s => %s", pProxyArray->GetContainerKeyClassDescription()->mpTypeInfoName, pProxyArray->GetContainerDataClassDescription()->mpTypeInfoName);
 						}

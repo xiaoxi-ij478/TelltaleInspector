@@ -1,7 +1,7 @@
 #include "imgui.h"
 #include "../InspectorTemplate.h"
 #include "../TelltaleInspector.h"
-#include <intrin.h>
+//#include <intrin.h>
 #include <filesystem>
 #include "ToolLibrary/MetaStream_JSON.hpp"
 #include "ToolLibrary/VersDB.h"
@@ -9,18 +9,19 @@
 #include "../stb/std_image_write.h"
 #include "../squish/squish.h"
 #include "../imstd/imgui_memedit.h"
-#include "ToolLibrary/types/Scene.h"
-#include "ToolLibrary/types/AnimOrChore.h"
+#include "ToolLibrary/Types/Scene.h"
+#include "ToolLibrary/Types/AnimOrChore.h"
 #include "ToolLibrary/Base64.h"
 #include "../imstd/imgui_stdlib.h"
 #include "ToolLibrary/Types/LanguageDatabase.h"
 #include "ToolLibrary/Types/StyleGuide.h"
 
+#define MessageBoxA(a,b,c,d)puts(b)
 bool Inside(ImVec2 p1, ImVec2 p2, ImVec2 pt){
-	float xmin = min(p1.x, p2.x);
-	float xmax = max(p1.x, p2.x);
-	float ymin = min(p1.y, p2.y);
-	float ymax = max(p1.y, p2.y);
+	float xmin = std::min(p1.x, p2.x);
+	float xmax = std::max(p1.x, p2.x);
+	float ymin = std::min(p1.y, p2.y);
+	float ymax = std::max(p1.y, p2.y);
 	return pt.x >= xmin && pt.x <= xmax && pt.y >= ymin && pt.y <= ymax;
 }
 
@@ -417,7 +418,7 @@ void Chore_RenderHeaderButtons(ChoreUserData& data){
 								MessageBoxA(0, "You already have an open task editing this embedded resource!", "Task exists!", MB_ICONWARNING);
 							}else{
 								//open task
-								data.openTask.push_back(CreateAndOpenTypeTask(resource.mhObjectDesc->mpTypeInfoName, 
+								data.openTask.push_back(CreateAndOpenTypeTask(resource.mhObjectDesc->mpTypeInfoName,
 									resource.mhObjectDesc, "Chore", data.mpTask->id, resource.mhObjectEmbedded, &ChoreEmbed_Callback, &data,data.myAliveSlot));
 							}
 						}
@@ -432,7 +433,7 @@ void Chore_RenderHeaderButtons(ChoreUserData& data){
 				}
 				ImGui::Text("Resource Name: ");
 				ImGui::SameLine();
-			
+
 				if(ImGui::Button("Edit")){
 					ImGui::OpenPopup("Resource Name");
 				}
@@ -497,7 +498,7 @@ void Chore_RenderHeaderButtons(ChoreUserData& data){
 				ImGui::Text("Resource Group:");
 				ImGui::SameLine();
 				ImGui::InputText("##in", &resource.mResourceGroup);
-				
+
 				CheckboxFlags("Filter Mover Animation:", "##cb7", ChoreResource::eFilterMoverAnimation, resource.mFlags);
 				CheckboxFlags("Mood Idle Persists:", "##cb9", ChoreResource::eMoodIdlePersists, resource.mFlags);
 				CheckboxFlags("Force Mover Animation Inclusion:", "##cb10", ChoreResource::eForceInclusionOfMoverAnimation, resource.mFlags);
@@ -519,7 +520,7 @@ void Chore_RenderHeaderButtons(ChoreUserData& data){
 							GetMetaClassDescription<PropertySet>(), "Chore", data.mpTask->id, &resource.mResourceProperties, &ChoreEmbed_Callback, &data, data.myAliveSlot));
 					}
 				}
-		
+
 				if (ImGui::Button("Close")) {
 					ImGui::CloseCurrentPopup();
 					data.inspectingBlockIndex = -1;
@@ -559,7 +560,7 @@ void Chore_RenderWindow(ChoreUserData& data){
 	);
 
 	// TIMELINE HEADER. FOR NOW: JUST SHOW 10 SECONDS AND LET USER SCROLL
-	
+
 	float y = 60.f;
 	float initialY = ImGui::GetCursorPos().y + y;
 	float range = data.viewRange[1] - data.viewRange[0];
@@ -570,7 +571,7 @@ void Chore_RenderWindow(ChoreUserData& data){
 		C + ImVec2(windowSize.x, y),
 		ImColor(80, 80, 80, 255)
 	);
-	
+
 	char timeBuffer[16]{ 0 };
 	for(int i = 0; i < 10; i++){
 		float windowX = windowSize.x * ((float)i / 10.f) + C.x;
@@ -583,7 +584,7 @@ void Chore_RenderWindow(ChoreUserData& data){
 			float subLineX = windowX + (windowSize.x * (1.0f / 10.f)) * ((float)j / 5.0f);
 			painter->AddLine(ImVec2(subLineX, C.y + y), ImVec2(subLineX, C.y + data.totalHeight), ImColor(130, 130, 130, 255), 1.3f);
 		}
-		sprintf_s(timeBuffer, "%.03fs", data.viewRange[0] + ((float)i / 10.f) * range);
+		sprintf(timeBuffer, "%.03fs", data.viewRange[0] + ((float)i / 10.f) * range);
 		painter->AddText(0, 15.0f, ImVec2(windowX + 5, C.y + 4), ImColor(190, 190, 190, 255), timeBuffer, timeBuffer + strlen(timeBuffer));
 	}
 
@@ -683,7 +684,7 @@ void Chore_RenderWindow(ChoreUserData& data){
 			else {
 				data.pSelectedAgentResource = 0;
 				data.pSelectedAgentResourceIndex = -1;
-				data.pSelected = pAgent;//ON SELECT 
+				data.pSelected = pAgent;//ON SELECT
 			}
 		}
 		if(data.pSelected == pAgent){
@@ -718,7 +719,7 @@ void Chore_RenderWindow(ChoreUserData& data){
 						data.pSelectedAgentResourceIndex = -1;
 					}
 					else {
-						data.pSelectedAgentResource = pResource;//ON SELECT 
+						data.pSelectedAgentResource = pResource;//ON SELECT
 						data.pSelectedAgentResourceIndex = j;
 					}
 				}
@@ -735,7 +736,7 @@ void Chore_RenderWindow(ChoreUserData& data){
 					painter->AddTriangle(p1, p2, p3, ImColor(65, 132, 240, 255));
 				}
 				char aPriority[64]{ 0 };
-				sprintf_s(aPriority, "Priority: %d", pResource->mPriority);
+				sprintf(aPriority, "Priority: %d", pResource->mPriority);
 				topLeft = topLeft + ImVec2(24, 0);
 				btmRight = ImVec2(C.x + windowSize.x + 24.f, topLeft.y + 32.f);
 				ImColor bgColor{ 209, 35, 13 };
@@ -796,7 +797,7 @@ void Chore_RenderWindow(ChoreUserData& data){
 					if (startX == endX)
 						continue;
 
-					//FOR NOW. Show blocks 
+					//FOR NOW. Show blocks
 					ImVec2 tl = ImVec2{ topLeft.x + startX - 24.0f, topLeft.y + 3};
 					ImVec2 br = ImVec2{ topLeft.x + endX - 24.0f, btmRight.y - 3};
 
@@ -805,7 +806,7 @@ void Chore_RenderWindow(ChoreUserData& data){
 						data.inspectingBlockIndex = k;
 						userHasSelected = true;
 					}
-					else if (!data.mbOpenPopup && !userHasSelected && Inside(tl, br, ImGui::GetMousePos()) && ImGui::IsKeyReleased(ImGuiKey_D) && MessageBoxA(0,"Are your sure you want to delete this block?","?",MB_YESNO|MB_ICONQUESTION)==IDYES) {
+					else if (!data.mbOpenPopup && !userHasSelected && Inside(tl, br, ImGui::GetMousePos()) && ImGui::IsKeyReleased(ImGuiKey_D) /*&& MessageBoxA(0,"Are your sure you want to delete this block?","?",MB_YESNO|MB_ICONQUESTION)==IDYES*/) {
 						data.pInspectingResource = 0;
 						data.inspectingBlockIndex = -1;//in case
 						userHasSelected = true;//anything else next frame

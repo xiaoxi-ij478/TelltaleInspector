@@ -127,38 +127,41 @@ bool convert_obj_newer(D3DMesh& mesh, const char* gid, std::string objfile, std:
 			if (bexit)
 				continue;
 			Handle<T3Texture>* pTexHandle = nullptr;
-			if (pMaterialProps == nullptr) {
-				TTL_Log("WARNING: Mesh contains no internal resources, skipping batch...\n");
-				continue;
-			}
-			if ((pTexHandle = (Handle<T3Texture>*) pMaterialProps->GetProperty("Material - Diffuse Texture")) == nullptr) {
-				TTL_Log("WARNING: Skipping mesh batch for material inside mesh because it does not have an associated diffuse texture!\n");
-				continue;
-			}
-			std::string texFile = "";//with D3DTX extension
-			for (auto& texName : texnames)
-				if (Symbol{ texName.c_str() }.GetCRC() == pTexHandle->mHandleObjectInfo.mObjectName.GetCRC()) {
-					texFile = texName;
-					break;
+			if (pMaterialProps) {
+				if ((pTexHandle = (Handle<T3Texture>*) pMaterialProps->GetProperty("Material - Diffuse Texture")) == nullptr) {
+					TTL_Log("WARNING: Skipping mesh batch for material inside mesh because it does not have an associated diffuse texture!\n");
+					continue;
 				}
-			if (texFile.length() == 0) {
-				TTL_Log("WARNING: Skipping mesh batch for material inside mesh because its texture file could not be located from the material!\n");
-				continue;
+				std::string texFile = "";//with D3DTX extension
+				for (auto& texName : texnames)
+					if (Symbol{ texName.c_str() }.GetCRC() == pTexHandle->mHandleObjectInfo.mObjectName.GetCRC()) {
+						texFile = texName;
+						break;
+					}
+				if (texFile.length() == 0) {
+					TTL_Log("WARNING: Skipping mesh batch for material inside mesh because its texture file could not be located from the material!\n");
+					continue;
+				}
+
+				texFile = texFile.substr(0, texFile.find_last_of('.'));
+
+				/*WRITE MATERIAL INFO*/
+				mtl << "\n\nnewmtl " << texFile << "\n";
+				//anything else?
+
+				obj << "\n\no " << texFile << "\n";
+				obj << "g " << texFile << "\n";
+				obj << "usemtl " << texFile << "\ns 1\n\n";
+
+				mtlCB(t, texFile);
+				mtl << "\tmap_Kd " << texFile << "\n";
+			}else{
+				TTL_Log("WARNING: Mesh contains no internal resources, skipping batch...\n");
+				// we allow it to continue to at least let us to be able to see
+				// how meshes were used
+				//continue;
+				obj <<"\n\n# UNRESOLVED MESH USAGE FOLLOW\n\n";
 			}
-
-			texFile = texFile.substr(0, texFile.find_last_of('.'));
-
-			/*WRITE MATERIAL INFO*/
-			mtl << "\n\nnewmtl " << texFile << "\n";
-			//anything else?
-
-			obj << "\n\no " << texFile << "\n";
-			obj << "g " << texFile << "\n";
-			obj << "usemtl " << texFile << "\ns 1\n\n";
-
-			mtlCB(t, texFile);
-			mtl << "\tmap_Kd " << texFile << "\n";
-
 			//WRITE FACES
 			for (int i = 0; i < batch.mNumPrimitives; i++) {
 				int faceIndex = (batch.mStartIndex / 3) + i;

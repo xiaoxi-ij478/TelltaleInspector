@@ -158,7 +158,7 @@ Index of this file:
 
 // Enforce cdecl calling convention for functions called by the standard library, in case compilation settings changed the default to e.g. __vectorcall
 #ifndef IMGUI_CDECL
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__WINE__)
 #define IMGUI_CDECL __cdecl
 #else
 #define IMGUI_CDECL

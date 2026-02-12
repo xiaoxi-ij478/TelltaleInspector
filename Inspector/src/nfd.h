@@ -46,12 +46,12 @@ extern "C" {
     /* save dialog */
     nfdresult_t NFD_SaveDialog(const nfdchar_t* filterList,
         const nfdchar_t* defaultPath,
-        nfdchar_t** outPath, const wchar_t* title = nullptr, bool bIsFolderPick = false);
+        nfdchar_t** outPath, const wchar_t*);
 
 
     /* select folder dialog */
     nfdresult_t NFD_PickFolder(const nfdchar_t* defaultPath,
-        nfdchar_t** outPath, const wchar_t* tt = false);
+        nfdchar_t** outPath, const wchar_t*);
 
     /* nfd_common.c */
 

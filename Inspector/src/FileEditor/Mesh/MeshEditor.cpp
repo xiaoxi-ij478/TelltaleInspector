@@ -4,6 +4,7 @@
 #include "imgui.h"
 #include "../../imstd/imgui_stdlib.h"
 
+#define MessageBoxA(a,b,c,d)puts(b)
 void MeshTask::process_mtl(std::string& in) {
 	if (!mtl_remove_png)
 		in += ".png";

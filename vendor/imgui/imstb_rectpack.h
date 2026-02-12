@@ -214,7 +214,7 @@ struct stbrp_context
 #endif
 
 // [DEAR IMGUI] Added STBRP__CDECL
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__WINE__)
 #define STBRP__NOTUSED(v)  (void)(v)
 #define STBRP__CDECL __cdecl
 #else

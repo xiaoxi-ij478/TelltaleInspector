@@ -3,6 +3,7 @@
 #include "../nfd.h"
 #include "ToolLibrary/FMOD/FSB5.h"
 
+#define MessageBoxA(a,b,c,d)puts(b)
 bool BankTask::getter(void* data, int index, const char** output)
 {
 	*output = ((FMODSample*)data)[index].mName.c_str();

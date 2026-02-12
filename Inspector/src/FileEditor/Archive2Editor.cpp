@@ -3,6 +3,7 @@
 #include "../nfd.h"
 #include "ToolLibrary/TTArchive2.hpp"
 
+#define MessageBoxA(a,b,c,d)puts(b)
 void ArchiveTask::import_in_singlefile(const std::filesystem::path& phys, exitstrat& strat) {
 	filet inst{ std::move(phys.filename().string()), phys.string() };
 	for (auto& f : file_names) {
@@ -10,7 +11,10 @@ void ArchiveTask::import_in_singlefile(const std::filesystem::path& phys, exitst
 			std::stringstream tmp{};
 			tmp << "Found a file name conflict. Replace(yes), ignore(no), cancel(select what I do for any more conflicts)? ";
 			tmp << inst.file;
-			int res = MessageBoxA(0, tmp.str().c_str(), "Name conflict", MB_ICONINFORMATION | MB_YESNOCANCEL);
+			puts(tmp.str().c_str());
+			strat=accept_all;
+			f.path = phys.string();
+			/*int res = MessageBoxA(0, tmp.str().c_str(), "Name conflict", MB_ICONINFORMATION | MB_YESNOCANCEL);
 			if (res == IDCANCEL) {
 				if (MessageBoxA(0, "Replace all (yes), ignore all (no)", "Select", MB_ICONINFORMATION | MB_YESNO) == IDYES)
 					strat = accept_all;
@@ -21,7 +25,7 @@ void ArchiveTask::import_in_singlefile(const std::filesystem::path& phys, exitst
 			if (res == IDYES) {
 				f.path = phys.string();
 				return;
-			}
+			}*/
 			continue;
 		}
 	}
@@ -184,7 +188,7 @@ void ArchiveTask::_render() {
 				return;
 			}
 			nfdchar_t* outPath = NULL;
-			nfdresult_t result = NFD_SaveDialog("ttarch2", 0, &outPath);
+			nfdresult_t result = NFD_SaveDialog("ttarch2", 0, &outPath,nullptr);
 			if (result == NFD_OKAY) {
 				if (!(sRuntime.settings.mFlags.mFlags & eISF_ShownTTArchMessage)) {
 					MessageBoxA(0, "You are about to create an archive. Ensure the compression/encryption"
@@ -205,7 +209,7 @@ void ArchiveTask::_render() {
 					TTArchive2::ResourceCreateEntry entry{};
 					entry.name = file.file;
 					if (file.path.size() == 0) {//from other ttarch
-						entry.mpStream = new DataStreamSubStream(arch.mpResourceStream, (unsigned __int64)file.sz, file.off);
+						entry.mpStream = new DataStreamSubStream(arch.mpResourceStream, (uint64_t)file.sz, file.off);
 					}
 					else {
 						std::filesystem::path fspath{ file.path };
@@ -221,7 +225,7 @@ void ArchiveTask::_render() {
 							continue;
 						}
 					}
-					entries.push_back(_STD move(entry));
+					entries.push_back(std::move(entry));
 				}
 				TTL_Log("creating archive...\n");
 				bool result = TTArchive2::Create(0, &dst, entries, bEncrypted, bCompressedOodle || bCompressedZ,

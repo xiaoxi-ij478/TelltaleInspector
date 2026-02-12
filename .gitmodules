@@ -1,0 +1,3 @@
+[submodule "TelltaleToolLib"]
+	path = TelltaleToolLib
+	url = git@github.com:xiaoxi-ij478/TelltaleToolLib

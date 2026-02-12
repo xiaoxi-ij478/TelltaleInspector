@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="GLFW" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/GLFW" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Debug/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/GLFW" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Release/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O3" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-w" />
+			<Add option="-D_GLFW_X11" />
+		</Compiler>
+		<Linker>
+			<Add library="Dwmapi" />
+		</Linker>
+		<Unit filename="include/GLFW/glfw3.h" />
+		<Unit filename="include/GLFW/glfw3native.h" />
+		<Unit filename="src/context.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/egl_context.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/glx_context.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/init.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/input.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/linux_joystick.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/monitor.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/null_init.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/null_joystick.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/null_monitor.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/null_window.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/osmesa_context.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/platform.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/posix_module.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/posix_thread.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/posix_time.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/vulkan.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/window.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/x11_init.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/x11_monitor.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/x11_window.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/xkb_unicode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Extensions>
+			<lib_finder>
+				<lib name="vulkan" />
+			</lib_finder>
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

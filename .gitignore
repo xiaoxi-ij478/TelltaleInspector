@@ -4,3 +4,9 @@
 /Release Builds/Dist/_Dev
 /Inspector/x64
 /Release Builds/The*
+bin/
+obj/
+cscope.out
+*.layout
+*.depend
+*.cscope_file_list

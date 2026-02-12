@@ -32,6 +32,8 @@
 #include <queue>
 #include <thread>
 #include <mutex>
+#include <atomic>
+#include <semaphore.h>
 
 #define APP_VERSION "v2.0.0"
 
@@ -44,7 +46,7 @@
 
 #define taskctor(T) T(const char* name, int id) : InspectorTask(name, id)
 //mark as to delete obviously doesnt need to be virtual = 0, but old fix saves needing to go and edit all
-#define deleteme() virtual void _deleteme() override { delete this; }
+#define deleteme(...) virtual void _deleteme() override { delete this; }
 
 const u64 hash_int8 = CRC64_CaseInsensitive(0, "int8");
 const u64 hash_uint16 = CRC64_CaseInsensitive(0, "uint16");
@@ -181,7 +183,7 @@ struct filet {
 	filet(const filet&) = default;
 	filet& operator=(const filet&) = default;
 
-	filet(std::string&& n, std::string path, u64 off = 0, u32 s = 0) : file(_STD move(n)) {
+	filet(std::string&& n, std::string path, u64 off = 0, u32 s = 0) : file(std::move(n)) {
 		this->path = path;
 		this->off = off;
 		this->sz = s;
@@ -434,7 +436,7 @@ struct InspectorSettings {
 		MetaClassDescription& meta_astr = *::GetMetaClassDescription("DCArray<String>");
 		MetaClassDescription& meta_int = *::GetMetaClassDescription("uint32");
 		{
-			DEFINET_3(set, InspectorSettings);
+			DEFINET_3(set, InspectorSettings,"InspectorSettings");
 			meta_set.mbHiddenInternal = true;
 			EXT(set, ttcfg);
 			FIRSTMEM2(set, mbShownIntroMessage, InspectorSettings, bool, 0);
@@ -462,13 +464,13 @@ struct InspectorRuntime {
 	inline int gen_id() {
 		return ++running_id;
 	}
-	
+
 	inline int gen_gate_slot(){
 		if (gates.size() >= 1048575) {//very very rare (probably will never happen), 1 MILLION slots! how long have you been editing? years!??
-			MessageBoxA(0, "Too many gate slots have been used up! Application needs to abort.", "Slot capacity", MB_ICONERROR);
+			puts("Too many gate slots have been used up! Application needs to abort.");
 			abort();
 		}else if(gates.size() >= 1040000){
-			MessageBoxA(0, "Many gate slots have been used! Please save all your work and re-open the application executable otherwise soon the application may need to force abort!", "Slot capacity", MB_ICONWARNING);
+			puts("Many gate slots have been used! Please save all your work and re-open the application executable otherwise soon the application may need to force abort!");
 		}
 		if (gates.size() == 0)
 			gates.reserve(1040000);
@@ -675,11 +677,11 @@ public:
 		stream.Open(pMyNewFileInStream, MetaStreamMode::eMetaStream_Read, {});
 		imported = false;
 		if (stream.mbErrored) {
-			MessageBoxA(0, error = "Could not open stream", "Error opening file", MB_ICONERROR);
+			puts("Could not open stream");
 		}
 		else {
 			if (PerformMetaSerializeAsync(&stream, &_mType) != eMetaOp_Succeed) {
-				MessageBoxA(0, error = "Could not import file, please contact me!", "Error", MB_ICONERROR);
+				puts("Could not import file, please contact me!");
 			}
 			else imported = true;
 		}
@@ -837,6 +839,7 @@ public:
 
 };
 
+class MetaStreamSubType;
 class MetaStreamTask : public InspectorTask {
 
 	friend class MetaStreamSubType;
@@ -951,7 +954,7 @@ class ContainerTask : public InspectorTask {
 
 	std::string file;
 	DataStreamContainer* container;
-	unsigned long long size = 0;
+	unsigned long size = 0;
 
 	virtual void _render() override;
 
@@ -991,7 +994,7 @@ public:
 
 	void process_mtl(std::string& in);
 
-	static void __declspec(noinline) process_mtl_cb(MeshTask* task, std::string& in);
+	static void process_mtl_cb(MeshTask* task, std::string& in);
 
 	bool try_open_mesh(std::string file);
 
@@ -1044,7 +1047,7 @@ public:
 		pTextureMCD = GetMetaClassDescription<T3Texture>();
 	}
 
-}; 
+};
 
 class PropTask : public InspectorTask {
 	struct {
@@ -1059,7 +1062,7 @@ public:
 		selected = true;
 		imp_yet = true;
 		ext_access_gate = b_access_gate;
-		prop_name = _STD move(name);
+		prop_name = std::move(name);
 		ext_user_data = user;
 	}
 private:
@@ -1288,7 +1291,7 @@ public:
 	std::priority_queue<Job, std::vector<Job>, std::less<Job>> pendingJobs{};
 	std::mutex lock{};
 	std::atomic_bool* pRunningGuard = 0;
-	HANDLE sem = INVALID_HANDLE_VALUE;
+	sem_t sem;
 	std::vector<int> aliveJobs{};
 	int runningHnd = 0;
 

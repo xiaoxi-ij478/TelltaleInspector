@@ -1,7 +1,7 @@
 #include "imgui.h"
 #include "../InspectorTemplate.h"
 #include "../TelltaleInspector.h"
-#include <intrin.h>
+//#include <intrin.h>
 #include <filesystem>
 #include "ToolLibrary/FMOD/FSB5.h"
 #include "ToolLibrary/MetaStream_JSON.hpp"
@@ -18,6 +18,7 @@
 #include "ToolLibrary/Types/Dialog.h"
 #include <imgui_node_editor.h>
 
+#define MessageBoxA(a,b,c,d)puts(b)
 namespace ed = ax::NodeEditor;
 
 struct Node {
@@ -78,7 +79,7 @@ void RenderTree(DlgChildSet* pSet, DlgUserData& data, int& id){
 				if(pSet1){
 					RenderTree(pSet1, data, id);
 				}
-			}catch(_STD exception){}
+			}catch(std::exception){}
 			ImGui::TreePop();
 		}
 	}

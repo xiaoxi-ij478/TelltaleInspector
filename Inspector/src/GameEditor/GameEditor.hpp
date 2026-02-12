@@ -6,7 +6,7 @@
 #include "ToolLibrary/T3/RenderScene.h"
 extern "C" {
 #include "ToolLibrary/Lua/decompile.h"
-#include "ToolLibrary/lua/proto.h"
+#include "ToolLibrary/Lua/proto.h"
 }
 
 #include <thread>
@@ -155,7 +155,7 @@ public:
 	unsigned long long frameNum = 0;
 	unsigned int sceneCamWindowHeight = 0;
 	unsigned int sceneCamWindowWidth = 0;
-	HANDLE sem = INVALID_HANDLE_VALUE;
+	sem_t sem;
 	PreloadPackage::RuntimeDataScene* mpScenePreloadPackage = 0;
 	std::mutex lock;
 	bool mbScenePreloaded = false;

@@ -4,6 +4,7 @@
 #include "ToolLibrary/T3/T3EffectCache.h"
 #include "ToolLibrary/T3/T3Effect.h"
 
+#define MessageBoxA(a,b,c,d)puts(b)
 static void dumpstack(lua_State* L) {
 	int top = lua_gettop(L);
 	for (int i = 1; i <= top; i++) {
@@ -401,7 +402,7 @@ void GameEditorTask::_init_diskres(GameEditor_DiskResourceSet& set) {
 		stream.Serialize(tmp.GetBuffer(), stream.GetSize());
 		tmp.GetBuffer()[stream.GetSize()] = 0;
 		bool bRemove = false;
-		if (set.mName._Starts_with("_rescdesc")) {
+		if (starts_with(set.mName.c_str(),"_rescdesc")) {
 			//version one
 			bRemove = true;
 			ensure_reg("GameEngine_AddBuildVersionInfo", luaAddBuildVersionInfo);
@@ -461,7 +462,7 @@ void GameEditorTask::_init_load_resource_sets(std::string current_folder, std::s
 			_init_diskres(set);
 		}
 		else if (file.is_directory()&&bFF) {
-			if(name._Starts_with("_TTI_Arc__")){
+			if(starts_with(name.c_str(),"_TTI_Arc__")){
 				GameEditor_DiskResourceSet& set = mResourceSets.emplace_back();
 				set.mType = GameEditor_DiskResourceSet::USER_ARCHIVE;
 				set.mGameDataPathPost = current_app + "/" + name;
@@ -514,7 +515,7 @@ void GameEditorTask::_render() {
 				MessageBoxA(0, "That game selected is not supported. You game must be newer than or including the game in the caption of this message box.", sBlowfishKeys[MIN].game_name,MB_ICONERROR);
 				mark_as_todelete();
 			}
-			mbSortFilename = MessageBoxA(0, "Would you like to sort all file names in the archive viewer? Selecting yes may take some time. If not, you can always filter by name or type.", "Sort files?", MB_YESNO) == IDYES;
+			mbSortFilename = false;//MessageBoxA(0, "Would you like to sort all file names in the archive viewer? Selecting yes may take some time. If not, you can always filter by name or type.", "Sort files?", MB_YESNO) == IDYES;
 			//mpWindow = new sf::RenderWindow(sf::VideoMode(800, 600), "Scene View");
 			sentArchives = 0;
 			for (auto& it : mResourceSets) {
@@ -616,7 +617,7 @@ void GameEditorTask::RenderResDescs(){
 	ImGui::SetNextItemWidth(400.f);
 	ImGui::InputText("##aaa", &mInputRD);
 	ImGui::SameLine();
-	if (ImGui::Button("Create") && (ends_with(mInputRD, ".lua") || ends_with(mInputRD, ".lenc")) && mInputRD._Starts_with("_resdesc_")) {
+	if (ImGui::Button("Create") && (ends_with(mInputRD, ".lua") || ends_with(mInputRD, ".lenc")) && starts_with(mInputRD.c_str(),"_resdesc_")) {
 		bool ok = 1;
 		for (auto& it : mResourceSets) {
 			if (it.mType == GameEditor_DiskResourceSet::RESOURCE_SET_DESCRIPTION && iequals(mInputRD, it.mName)) {
@@ -724,14 +725,14 @@ void GameEditorTask::AsyncMakeCb(const char* m, float){
 void GameEditorTask::AsyncMakeArchive2(void* _task, void* a, void* b){
 	GameEditorTask* task = (GameEditorTask*)_task;
 	pMakingTask = task;
-	
-	// 
+
+	//
 	std::filesystem::path folder = task->game_data / task->mResourceSets[task->selectedMakeArchiveIndex].mGameDataPathPost.substr(1);
 	std::filesystem::path arc = task->game_data / task->mResourceSets[task->selectedMakeArchiveIndex].mName;
 	std::vector<TTArchive2::ResourceCreateEntry> entries{};
 
 	AsyncMakeCb("Gathering files", 0.f);
-	
+
 	for (auto& file : std::filesystem::directory_iterator{ folder }) {
 		if(file.is_regular_file()){
 			TTArchive2::ResourceCreateEntry e{};
@@ -743,7 +744,7 @@ void GameEditorTask::AsyncMakeArchive2(void* _task, void* a, void* b){
 	}
 
 	AsyncMakeCb("Creating archive", 0.f);
-	
+
 	bool f = false;
 	DataStream* pStream = 0;
 	if(!TTArchive2::Create(&AsyncMakeCb, pStream=_OpenDataStreamFromDisc(arc.string().c_str(), WRITE), entries, task->mbMakeEncrypt, task->mbMakeZlib, Compression::Library::ZLIB, 2)){
@@ -755,7 +756,7 @@ void GameEditorTask::AsyncMakeArchive2(void* _task, void* a, void* b){
 	}
 	delete pStream;
 	if (f)
-		DeleteFileA(arc.string().c_str());
+		unlink(arc.string().c_str());
 
 	task->mpMakeArchiveWaiter->store(true);
 	pMakingTask = 0;
@@ -809,7 +810,7 @@ void GameEditorTask::RenderGameData(){
 				memcpy(working_buffer, set.mGameDataPathPost.c_str(), set.mGameDataPathPost.length());
 				working_buffer[set.mGameDataPathPost.length()] = '/';
 				for(auto& f : set.filenames){
-					if(f._Starts_with(findFileField)){
+					if(starts_with(f.c_str(),findFileField.c_str())){
 						bool selected = false;
 						memcpy(working_buffer + set.mGameDataPathPost.length() + 1, f.c_str(), f.length() + 1);
 						ImGui::Selectable(working_buffer, &selected);
@@ -1043,7 +1044,7 @@ void GameEditorTask::RenderGameData(){
 				}
 				ImGui::SameLine();
 				if (ImGui::Button("Open in System Explorer")) {
-					ShellExecuteA(NULL, "open", folder.string().c_str(), NULL, NULL, SW_SHOWDEFAULT);
+					system((std::string("open ")+folder.string()).c_str());//ShellExecuteA(NULL, "open", folder.string().c_str(), NULL, NULL, SW_SHOWDEFAULT);
 				}
 				ImGui::TableSetColumnIndex(0);
 				if (ImGui::TreeNodeEx(it.mName.c_str(), ImGuiTreeNodeFlags_OpenOnArrow)) {
@@ -1232,7 +1233,7 @@ void GameEditorTask::AsyncPreloadResource(void* _task, void* res, void* type) {
 		TTL_Log("ERROR unknown file type hash %llx. Cannot load resource %llx\n", (u64)type, resourceName.GetCRC());
 	}
 	else {
-		task->lock.lock();// LOCK 
+		task->lock.lock();// LOCK
 		DataStream* pStream = task->OpenResource(resourceName, _n);
 		if (!pStream) {
 			task->lock.unlock(); // UNLOCK
@@ -1488,12 +1489,12 @@ void GameEditorTask::RenderScene(){
 			sceneCamWindowHeight = event.size.height;
 		}
 
-		
+
 	}
 	mpWindow->clear(sf::Color::Black);
 
 	// Draw
-	
+
 
 	mpWindow->display();*/
 	frameNum++;
@@ -1501,7 +1502,7 @@ void GameEditorTask::RenderScene(){
 
 DataStream* GameEditorTask::OpenShaderPackage(const String& fxpack) {
 	TTL_Log("Cannot load shader packages yet. IMPLEMENT ME");
-	__debugbreak();
+	abort();
 	return 0;
 }
 
@@ -1517,7 +1518,7 @@ void GameEditorTask::OnScenePostLoad() {
 
 	/*
 	*		Different types of agents:
-	* 
+	*
 		PathTo::OnSetupAgent((Ptr<Agent> *)pAgentGettingCreated.mpData, &shPathToProps);
 		VfxGroup::OnSetupAgent((Ptr<Agent> *)v1, &shVfxGroupProps);
 		NavCam::OnSetupAgent((Ptr<Agent> *)v1, &shNavCamProps);
@@ -1587,18 +1588,18 @@ void GameEditorTask::Init(std::filesystem::path base) {
 }
 
 /*TODO: save sorted indicies to disk for GAME archives to help load time.
-* 
+*
 * MESH KEYS:
-* 
+*
 * .. - Material Override (hprop)
 * .. - LightEnv Group (enumt3lightenvgroup)
 * .. - Render Scene (symbol)
 * .. - Render Camera (symbol)
 * .. - Render Resolution (enumrendertextureresolution)
 * .. - Render Clear Color (color)
-* 
+*
 * TODO:
-* - for twau/twd2 to be supported, add lenc support: when creating new fix _resdesc_50 prefix to _resourcedescriptions or whatever. 
+* - for twau/twd2 to be supported, add lenc support: when creating new fix _resdesc_50 prefix to _resourcedescriptions or whatever.
 * - for borderland/thrones: uses LUA not lenc, but uses LEn for all scripts (LEo does not exit in exe). so fix that
 */
 
@@ -1621,8 +1622,7 @@ GameEditorTask::~GameEditorTask() {
 		it.mArchive2 = 0;
 	}
 	//mpWindow->close();
-	CloseHandle(sem);
-	sem = 0;
+	sem_destroy(&sem);
 	//if (mpWindow)
 	//	delete mpWindow;
 	T3::Shutdown();

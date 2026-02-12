@@ -3,6 +3,7 @@
 #include "imgui.h"
 #include "../imstd/imgui_stdlib.h"
 
+#define MessageBoxA(a,b,c,d)puts(b)
 void PropTask::_render() {
 	//TODO EMBEDDED PROPS
 	lister.frame_check_addrem = true;
@@ -94,7 +95,7 @@ void PropTask::_render() {
 				else {
 					if (!ends_with(nm, ".prop"))
 						nm += ".prop";
-					pth += _STD move(nm);
+					pth += std::move(nm);
 					DataStreamFileDisc* ds = _OpenDataStreamFromDisc(pth.c_str(), WRITE);
 					if (ds == nullptr) {
 						MessageBoxA(0, "The file could not be opened for writing!", "Error", MB_ICONERROR);
@@ -196,7 +197,7 @@ void PropTask::_render() {
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 		if (ImGui::BeginTable("split", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
 		{
-			lister.PropTree(&prop, "Properties", (int)this & 0x7FFFFFF);
+			lister.PropTree(&prop, "Properties", (long long)this & 0x7FFFFFF);
 			ImGui::EndTable();
 		}
 		ImGui::PopStyleVar();

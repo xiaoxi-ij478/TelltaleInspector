@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="Telltale Inspector">
+		<Project filename="Walnut/Walnut.cbp">
+			<Depends filename="vendor/imgui/ImGui.cbp" />
+		</Project>
+		<Project filename="vendor/imgui/ImGui.cbp" />
+		<Project filename="Inspector/Inspector.cbp">
+			<Depends filename="Walnut/Walnut.cbp" />
+			<Depends filename="vendor/imgui/ImGui.cbp" />
+			<Depends filename="TelltaleToolLib/TelltaleToolLib.cbp" />
+			<Depends filename="vendor/GLFW/GLFW.cbp" />
+		</Project>
+		<Project filename="TelltaleToolLib/TelltaleToolLib.cbp" />
+		<Project filename="vendor/GLFW/GLFW.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>
