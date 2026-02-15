@@ -1622,7 +1622,7 @@ GameEditorTask::~GameEditorTask() {
 		it.mArchive2 = 0;
 	}
 	//mpWindow->close();
-	sem_destroy(&sem);
+//	sem_destroy(&sem);
 	//if (mpWindow)
 	//	delete mpWindow;
 	T3::Shutdown();

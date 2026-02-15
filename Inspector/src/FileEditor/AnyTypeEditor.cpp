@@ -863,9 +863,9 @@ void AnyTypeEditor::TreeItem(MetaClassDescription* clazz, void* pRawData, std::s
 									TreeItem(GetMetaClassDescription<Symbol>(), &mat->mLegacyBlendModeRuntimeProperty,
 										&(n = "Legacy Blend Mode Property"), 6903, to_del, i + 3, false, h, 0, clazz->GetMemberDescription("mLegacyBlendModeRuntimeProperty"));
 									ImGui::TableNextRow();
-									TreeItem(GetMetaClassDescription<long>(), &mat->mDomain, &(n = "Domain"), 6904, to_del, i + 4, false, h, 0, clazz->GetMemberDescription("mDomain"));
+									TreeItem(GetMetaClassDescription<int32_t>(), &mat->mDomain, &(n = "Domain"), 6904, to_del, i + 4, false, h, 0, clazz->GetMemberDescription("mDomain"));
 									ImGui::TableNextRow();
-									TreeItem(GetMetaClassDescription<long>(), &mat->mVersion, &(n = "Version"), 6905, to_del, i + 5, false, h, 0, clazz->GetMemberDescription("mVersion"));
+									TreeItem(GetMetaClassDescription<int32_t>(), &mat->mVersion, &(n = "Version"), 6905, to_del, i + 5, false, h, 0, clazz->GetMemberDescription("mVersion"));
 
 									ImGui::TableNextRow();
 									TreeItem(GetMetaClassDescription<DCArray<T3MaterialRuntimeProperty>>(), &mat->mRuntimeProperties, &(n = "Runtime Properties"), 6906, to_del,

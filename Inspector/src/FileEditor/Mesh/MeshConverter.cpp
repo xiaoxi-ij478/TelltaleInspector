@@ -9,15 +9,9 @@ void write_face(std::ofstream& obj, unsigned short* currentFace, int off) {
 
 //CONVERT NEW D3DMESH => OBJ (GAMES NEWER AND INCLUDING THE WALKING DEAD: MICHONNE)
 bool convert_obj_newer(D3DMesh& mesh, const char* gid, std::string objfile, std::string mtlfile, std::string& err, std::vector<std::string>& texnames, mtl_delta_cb mtlCB, MeshTask* t) {
-	std::ofstream obj{ objfile };
+	objfile.erase(objfile.cend()-4,objfile.cend());
+	mtlfile.erase(mtlfile.cend()-4,mtlfile.cend());
 	TelltaleToolLib_SetBlowfishKey(gid);
-	std::ofstream mtl{ mtlfile };
-	obj << "mtllib " << (std::filesystem::path{ mtlfile }.filename().string()) << "\n\n";
-	obj << "# Converted to OBJ by The Telltale Inspector\n";
-	obj << "# https://github.com/LucasSaragosa\n\n\n";
-	mtl << "# Converted to MTL by The Telltale Inspector\n";
-	mtl << "# https://github.com/LucasSaragosa\n";
-
 	if (mesh.mMeshData.mLODs.GetSize() == 0) {
 		TTL_Log("WARNING: Mesh contains no LODs, assuming its empty..\n");
 		return true;
@@ -44,133 +38,153 @@ bool convert_obj_newer(D3DMesh& mesh, const char* gid, std::string objfile, std:
 		full_index_buffer.push_back(p);
 	}
 
-	T3MeshLOD& lod = mesh.mMeshData.mLODs[0];//highest lod will be exported.
-	//TODO if michonne look into mBatchesM
+	T3MeshLOD &lod=mesh.mMeshData.mLODs[0];
 
 	T3GFXVertexState& vertexState = *mesh.mMeshData.mVertexStates[lod.mVertexStateIndex];
 	T3GFXBuffer& positionsBuffer = *vertexState.mpVertexBuffer[get_params(vertexState, eGFXPlatformAttribute_Position)->mBufferIndex];//must have positions
 	void* faces = full_index_buffer[lod.mVertexStateIndex];
 
-	//WRITE POSITIONS
-	for (int i = 0; i < positionsBuffer.mCount; i++) {
-		Vector3 vert{};
-		if (get_params(vertexState, eGFXPlatformAttribute_Position)->mFormat == eGFXPlatformFormat_UN16x4) {
-			u16* raw = (u16*)((char*)positionsBuffer.mpCPUBuffer + (positionsBuffer.mStride * i) + get_params(vertexState, eGFXPlatformAttribute_Position)->mBufferOffset);
-			Vector3 posScale = mesh.mMeshData.mPositionScale;
-			Vector3 posOffset = mesh.mMeshData.mPositionOffset;//position W offset is for the last one but we dont need it
-			vert.x = ((((float)raw[0]) / 65536.f) * posScale.x) + posOffset.x;
-			vert.y = ((((float)raw[1]) / 65536.f) * posScale.y) + posOffset.y;
-			vert.z = ((((float)raw[2]) / 65536.f) * posScale.z) + posOffset.z;
-		}//might another fucking weird one idk ill do later if i see it
-		else {
-			if (get_params(vertexState, eGFXPlatformAttribute_Position)->mFormat != eGFXPlatformFormat_F32x3) {
-				err = "Positions format is not F32x3!";
-				return false;
+	// export separate UV layer as separate meshes
+	unsigned index_=0;
+	for (GFXPlatformAttributeParams&uv_param:get_all_uvs(vertexState))
+	{
+		std::ofstream obj(
+			objfile+"_uv_"+std::to_string(index_)+".obj"
+		);
+		std::ofstream mtl(
+			mtlfile+"_uv_"+std::to_string(index_)+".mtl"
+		);
+		obj << "mtllib " << (std::filesystem::path{ mtlfile }.filename().string()) << "\n\n";
+		obj << "# Converted to OBJ by The Telltale Inspector\n";
+		obj << "# https://github.com/LucasSaragosa\n\n\n";
+		mtl << "# Converted to MTL by The Telltale Inspector\n";
+		mtl << "# https://github.com/LucasSaragosa\n";
+
+		//WRITE POSITIONS
+		for (int i = 0; i < positionsBuffer.mCount; i++) {
+			Vector3 vert{};
+			if (get_params(vertexState, eGFXPlatformAttribute_Position)->mFormat == eGFXPlatformFormat_UN16x4) {
+				u16* raw = (u16*)((char*)positionsBuffer.mpCPUBuffer + (positionsBuffer.mStride * i) + get_params(vertexState, eGFXPlatformAttribute_Position)->mBufferOffset);
+				Vector3 posScale = mesh.mMeshData.mPositionScale;
+				Vector3 posOffset = mesh.mMeshData.mPositionOffset;//position W offset is for the last one but we dont need it
+				vert.x = ((((float)raw[0]) / 65535.f) * posScale.x) + posOffset.x;
+				vert.y = ((((float)raw[1]) / 65535.f) * posScale.y) + posOffset.y;
+				vert.z = ((((float)raw[2]) / 65535.f) * posScale.z) + posOffset.z;
+			}//might another fucking weird one idk ill do later if i see it
+			else {
+				if (get_params(vertexState, eGFXPlatformAttribute_Position)->mFormat != eGFXPlatformFormat_F32x3) {
+					err = "Positions format is not F32x3!";
+					return false;
+				}
+				int vertind = i;
+				float* currentVert = (float*)((char*)positionsBuffer.mpCPUBuffer + (positionsBuffer.mStride * vertind) + get_params(vertexState, eGFXPlatformAttribute_Position)->mBufferOffset);
+				vert = { currentVert[0], currentVert[1], currentVert[2] };
+				if (vert.x > 0.f && vert.x < 0.00001f)
+					vert.x = 0.f;
+				if (vert.y > 0.f && vert.y < 0.00001f)
+					vert.y = 0.f;
+				if (vert.z > 0.f && vert.z < 0.00001f)
+					vert.z = 0.f;
 			}
-			int vertind = i;
-			float* currentVert = (float*)((char*)positionsBuffer.mpCPUBuffer + (positionsBuffer.mStride * vertind) + get_params(vertexState, eGFXPlatformAttribute_Position)->mBufferOffset);
-			vert = { currentVert[0], currentVert[1], currentVert[2] };
-			if (vert.x > 0.f && vert.x < 0.00001f)
-				vert.x = 0.f;
-			if (vert.y > 0.f && vert.y < 0.00001f)
-				vert.y = 0.f;
-			if (vert.z > 0.f && vert.z < 0.00001f)
-				vert.z = 0.f;
+			obj << "v " << vert.x << " " << vert.y << " " << vert.z << "\n";
 		}
-		obj << "v " << vert.x << " " << vert.y << " " << vert.z << "\n";
-	}
 
-	//WRITE UVS
-	if (get_params(vertexState, eGFXPlatformAttribute_TexCoord)->mFormat != eGFXPlatformFormat_None) {
-		T3GFXBuffer& uvBuffer = *vertexState.mpVertexBuffer[get_params(vertexState, eGFXPlatformAttribute_TexCoord)->mBufferIndex];
-		GFXPlatformFormat fmt = get_params(vertexState, eGFXPlatformAttribute_TexCoord)->mFormat;
-		T3MeshTexCoordTransform uvTransform = mesh.mMeshData.mTexCoordTransform[0];//first UVs
-		for (int i = 0; i < uvBuffer.mCount; i++) {
-			void* currentVert = (float*)((char*)uvBuffer.mpCPUBuffer + (uvBuffer.mStride * i) + get_params(vertexState, eGFXPlatformAttribute_TexCoord)->mBufferOffset);
-			obj << "vt " << decompose_new_UV(currentVert, fmt, 0, uvTransform) << " " << decompose_new_UV(currentVert, fmt, 1, uvTransform) << "\n";
+		//WRITE UVS
+		if (uv_param.mFormat != eGFXPlatformFormat_None) {
+			T3GFXBuffer& uvBuffer = *vertexState.mpVertexBuffer[uv_param.mBufferIndex];
+			GFXPlatformFormat fmt = uv_param.mFormat;
+			T3MeshTexCoordTransform uvTransform = mesh.mMeshData.mTexCoordTransform[0];//first UVs
+			for (int i = 0; i < uvBuffer.mCount; i++) {
+				void* currentVert = (float*)((char*)uvBuffer.mpCPUBuffer + (uvBuffer.mStride * i) + uv_param.mBufferOffset);
+				obj << "vt " << decompose_new_UV(currentVert, fmt, 0, uvTransform) << " " << decompose_new_UV(currentVert, fmt, 1, uvTransform) << "\n";
+			}
 		}
-	}
 
-	//WRITE NORMALS
-	if (get_params(vertexState, eGFXPlatformAttribute_Normal)->mFormat != eGFXPlatformFormat_None) {
-		T3GFXBuffer& nmBuffer = *vertexState.mpVertexBuffer[get_params(vertexState, eGFXPlatformAttribute_Normal)->mBufferIndex];
-		GFXPlatformFormat fmt = get_params(vertexState, eGFXPlatformAttribute_Normal)->mFormat;
-		for (int i = 0; i < nmBuffer.mCount; i++) {
-			void* currentVert = (float*)((char*)nmBuffer.mpCPUBuffer + (nmBuffer.mStride * i) + get_params(vertexState, eGFXPlatformAttribute_Normal)->mBufferOffset);
-			obj << "vn " << decompose_to_float(currentVert, fmt, 0) << " " << decompose_to_float(currentVert, fmt, 1) << " " << decompose_to_float(currentVert, fmt, 2) << "\n";
+		//WRITE NORMALS
+		if (get_params(vertexState, eGFXPlatformAttribute_Normal)->mFormat != eGFXPlatformFormat_None) {
+			T3GFXBuffer& nmBuffer = *vertexState.mpVertexBuffer[get_params(vertexState, eGFXPlatformAttribute_Normal)->mBufferIndex];
+			GFXPlatformFormat fmt = get_params(vertexState, eGFXPlatformAttribute_Normal)->mFormat;
+			for (int i = 0; i < nmBuffer.mCount; i++) {
+				void* currentVert = (float*)((char*)nmBuffer.mpCPUBuffer + (nmBuffer.mStride * i) + get_params(vertexState, eGFXPlatformAttribute_Normal)->mBufferOffset);
+				obj << "vn " << decompose_to_float(currentVert, fmt, 0) << " " << decompose_to_float(currentVert, fmt, 1) << " " << decompose_to_float(currentVert, fmt, 2) << "\n";
+			}
 		}
-	}
 
-	bool bexit = false;
-	for (int j = 0; j < 1; j++) {//only do one batch array? no idea what second one is - FIGURED OUT ITS  SHADOWS, FUCK THEM.
-		for (int k = 0; k < lod.mBatches[j].GetSize(); k++) {
-			bexit = false;
-			T3MeshBatch& batch = lod.mBatches[j][k];
-			T3MeshMaterial& material = mesh.mMeshData.mMaterials[batch.mMaterialIndex];
-			PropertySet* pMaterialProps = nullptr;
-			for (int i = 0; i < mesh.mInternalResources.mSize; i++) {
-				if (mesh.mInternalResources[i].mHandleObjectInfo.mObjectName == material.mhMaterial.mHandleObjectInfo.mObjectName) {
-					pMaterialProps = (PropertySet*)mesh.mInternalResources[i].GetHandleObjectPointer();
-					if (pMaterialProps == nullptr) {
-						TTL_Log("ERROR: Material internal resource properties could not be found\n");
-						err = "Material internal resource properties could not be found";
-						return false;
-					}
-					if (mesh.mInternalResources[i].GetTypeDesc() != GetMetaClassDescription<PropertySet>()) {
-						TTL_Log("ERROR: Ignoring material inside mesh, because its resource is not a property set!!\n");
-						bexit = true;
+		bool bexit = false;
+		for (int j = 0; j < 1; j++) {//only do one batch array? no idea what second one is - FIGURED OUT ITS  SHADOWS, FUCK THEM.
+			for (int k = 0; k < lod.mBatches[j].GetSize(); k++) {
+				bexit = false;
+				T3MeshBatch& batch = lod.mBatches[j][k];
+				T3MeshMaterial& material = mesh.mMeshData.mMaterials[batch.mMaterialIndex];
+				PropertySet* pMaterialProps = nullptr;
+				for (int i = 0; i < mesh.mInternalResources.mSize; i++) {
+					if (mesh.mInternalResources[i].mHandleObjectInfo.mObjectName == material.mhMaterial.mHandleObjectInfo.mObjectName) {
+						pMaterialProps = (PropertySet*)mesh.mInternalResources[i].GetHandleObjectPointer();
+						if (pMaterialProps == nullptr) {
+							TTL_Log("ERROR: Material internal resource properties could not be found\n");
+							err = "Material internal resource properties could not be found";
+							return false;
+						}
+						if (mesh.mInternalResources[i].GetTypeDesc() != GetMetaClassDescription<PropertySet>()) {
+							TTL_Log("ERROR: Ignoring material inside mesh, because its resource is not a property set!!\n");
+							bexit = true;
+							break;
+						}
 						break;
 					}
-					break;
 				}
-			}
-			if (bexit)
-				continue;
-			Handle<T3Texture>* pTexHandle = nullptr;
-			if (pMaterialProps) {
-				if ((pTexHandle = (Handle<T3Texture>*) pMaterialProps->GetProperty("Material - Diffuse Texture")) == nullptr) {
-					TTL_Log("WARNING: Skipping mesh batch for material inside mesh because it does not have an associated diffuse texture!\n");
+				if (bexit)
 					continue;
-				}
-				std::string texFile = "";//with D3DTX extension
-				for (auto& texName : texnames)
-					if (Symbol{ texName.c_str() }.GetCRC() == pTexHandle->mHandleObjectInfo.mObjectName.GetCRC()) {
-						texFile = texName;
-						break;
+				Handle<T3Texture>* pTexHandle = nullptr;
+				if (pMaterialProps) {
+					if ((pTexHandle = (Handle<T3Texture>*) pMaterialProps->GetProperty("Material - Diffuse Texture")) == nullptr) {
+						TTL_Log("WARNING: Skipping mesh batch for material inside mesh because it does not have an associated diffuse texture!\n");
+						continue;
 					}
-				if (texFile.length() == 0) {
-					TTL_Log("WARNING: Skipping mesh batch for material inside mesh because its texture file could not be located from the material!\n");
-					continue;
+					std::string texFile = "";//with D3DTX extension
+					for (auto& texName : texnames)
+						if (Symbol{ texName.c_str() }.GetCRC() == pTexHandle->mHandleObjectInfo.mObjectName.GetCRC()) {
+							texFile = texName;
+							break;
+						}
+					if (texFile.length() == 0) {
+						TTL_Log("WARNING: Skipping mesh batch for material inside mesh because its texture file could not be located from the material!\n");
+						continue;
+					}
+
+					texFile = texFile.substr(0, texFile.find_last_of('.'));
+
+					/*WRITE MATERIAL INFO*/
+					mtl << "\n\nnewmtl " << texFile << "\n";
+					//anything else?
+
+					obj << "\n\no " << texFile << "\n";
+					obj << "g " << texFile << "\n";
+					obj << "usemtl " << texFile << "\ns 1\n\n";
+
+					mtlCB(t, texFile);
+					mtl << "\tmap_Kd " << texFile << "\n";
+				}else{
+					TTL_Log("WARNING: Mesh contains no internal resources, skipping batch...\n");
+					// we allow it to continue to at least let us to be able to see
+					// how meshes were used
+					//continue;
+					obj <<"\n\n# UNRESOLVED MESH USAGE FOLLOW\n\n";
 				}
+				//WRITE FACES
+				for (int i = 0; i < batch.mNumPrimitives; i++) {
+					int faceIndex = (batch.mStartIndex / 3) + i;
+					unsigned short* currentFace = (unsigned short*)((char*)faces + sizeof(unsigned short) * faceIndex * 3);
 
-				texFile = texFile.substr(0, texFile.find_last_of('.'));
-
-				/*WRITE MATERIAL INFO*/
-				mtl << "\n\nnewmtl " << texFile << "\n";
-				//anything else?
-
-				obj << "\n\no " << texFile << "\n";
-				obj << "g " << texFile << "\n";
-				obj << "usemtl " << texFile << "\ns 1\n\n";
-
-				mtlCB(t, texFile);
-				mtl << "\tmap_Kd " << texFile << "\n";
-			}else{
-				TTL_Log("WARNING: Mesh contains no internal resources, skipping batch...\n");
-				// we allow it to continue to at least let us to be able to see
-				// how meshes were used
-				//continue;
-				obj <<"\n\n# UNRESOLVED MESH USAGE FOLLOW\n\n";
-			}
-			//WRITE FACES
-			for (int i = 0; i < batch.mNumPrimitives; i++) {
-				int faceIndex = (batch.mStartIndex / 3) + i;
-				unsigned short* currentFace = (unsigned short*)((char*)faces + sizeof(unsigned short) * faceIndex * 3);
-
-				write_face(obj, currentFace, batch.mBaseIndex);
+					write_face(obj, currentFace, batch.mBaseIndex);
+				}
 			}
 		}
+index_++;
 	}
+
+
+
 
 	for (auto& ptr : full_index_buffer)
 		free(ptr);

@@ -10,3 +10,4 @@ cscope.out
 *.layout
 *.depend
 *.cscope_file_list
+ValgrindOut.xml
