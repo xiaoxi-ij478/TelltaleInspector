@@ -66,7 +66,7 @@
 				<Option object_output="obj/test3" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters='&quot;/home/xiaoxi/Desktop/New Folder 2/skM1_admin_body.d3dmesh&quot;' />
+				<Option parameters='&quot;/home/xiaoxi/Desktop/fred/skM1_fred_hair.d3dmesh&quot;' />
 				<Option projectLinkerOptionsRelation="1" />
 				<Compiler>
 					<Add option="-ggdb3" />
