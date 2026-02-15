@@ -461,7 +461,7 @@ public:
 			delete dataArchive;
 			if (!bDebug)
 				TTL_Log("WARN: Attempting to use database folders instead of database archive as it could be found");
-			DataStreamFileDisc* db = _OpenDataStreamFromDisc("./_Dev/Database/ToolLibrary.HashDB", READ);
+			DataStreamFileDisc* db = _OpenDataStreamFromDisc("./_Dev/ToolLibrary.HashDB", READ);
 			if (db->IsInvalid()) {
 				delete db;
 				MessageBoxA(NULL, "Could not locate the hash database "

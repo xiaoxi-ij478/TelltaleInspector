@@ -6,10 +6,17 @@
 #include "ToolLibrary/Types/HandleObjectInfo.h"
 #include "ToolLibrary/Types/Skeleton.h"
 
+std::string lookup_crc(uint64_t crc,const std::string &default_val){
+std::string name;TelltaleToolLib_GetGlobalHashDatabase()->FindEntry(nullptr,crc,&name);
+return name.length()?name:default_val;
+}
+
+#define lookup_bone_crc(crc) lookup_crc(crc,"bone_"+std::to_string(crc))
+
 int main(int argc,char **argv)
 {if(argc<2)return 1;
     TelltaleToolLib_Initialize("MC2");
-	DataStreamFileDisc* db = _OpenDataStreamFromDisc("/home/xiaoxi/Desktop/sources/TelltaleInspector/Release Builds/Dist/Database/ToolLibrary.HashDB", READ);
+	DataStreamFileDisc* db = _OpenDataStreamFromDisc("/home/xiaoxi/Desktop/sources/TelltaleInspector/Inspector/rundir/_Dev/ToolLibrary.HashDB", READ);
 	TelltaleToolLib_SetGlobalHashDatabaseFromStream(db);
 	MetaStream ms;ms.Open(_OpenDataStreamFromDisc(argv[1],READ),MetaStreamMode::eMetaStream_Read,{});
 	Skeleton sk;PerformMetaSerializeAsync<Skeleton>(&ms,&sk);
@@ -17,21 +24,23 @@ int main(int argc,char **argv)
 	for(const Skeleton::Entry&i:sk.mEntries)
 	{
 		std::cout<<
-		"cccc=bpy.context.blend_data.armatures[0].edit_bones.new('bone_"<<std::hex<<i.mJointName.GetCRC()<<std::dec<<"')"<<std::endl<<
-		"cccc.use_deform=False"<<std::endl<<
-		"cccc.parent=bpy.context.blend_data.armatures[0].edit_bones['bone_"<<std::hex<<i.mParentName.GetCRC()<<std::dec<<"']"<<std::endl<<
-		"cccc.use_connect=True"<<std::endl<<
+		"cccc=bpy.context.blend_data.armatures[0].edit_bones.new('"<<lookup_bone_crc(i.mJointName.GetCRC())<<"')"<<std::endl<<
+		"cccc.use_deform=False"<<std::endl;
+		if(i.mParentIndex!=-1)
+			std::cout<<"cccc.parent=bpy.context.blend_data.armatures[0].edit_bones['"<<lookup_bone_crc(sk.mEntries[i.mParentIndex].mJointName.GetCRC())<<"']"<<std::endl;
+		std::cout<<
+		"cccc.use_connect=False"<<std::endl<<
 		"_quat="
 		"Quaternion(cccc.parent['_transform_quat'])"
 		"@"
 		"Quaternion(("<<i.mLocalQuat.w<<','<<i.mLocalQuat.x<<','<<i.mLocalQuat.y<<','<<i.mLocalQuat.z<<"))"
 		<<std::endl<<
 		"cccc['_transform_quat']=(_quat.w,_quat.x,_quat.y,_quat.z)"<<std::endl<<
-		"cccc.tail=cccc.head+("
-		"_quat.to_matrix())"
+		"cccc.head="
+		"cccc.parent.head+(_quat.to_matrix()"
 		"@"
-		"Vector(("<<i.mLocalPos.x<<','<<i.mLocalPos.y<<','<<i.mLocalPos.z<<"))"
-		<<std::endl;
+		"Vector(("<<i.mLocalPos.x<<','<<i.mLocalPos.y<<','<<i.mLocalPos.z<<")))"<<std::endl<<
+		"cccc.tail=cccc.head+Vector((0,0.1,0))"<<std::endl;
 	}
     TelltaleToolLib_Free();
     return 0;
