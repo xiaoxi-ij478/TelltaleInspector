@@ -37,6 +37,7 @@
 #define _GLFW_TYPE_BUTTON   2
 #define _GLFW_TYPE_POV      3
 
+#define IDirectInputDevice8 WINELIB_NAME_AW(IDirectInputDevice8)
 // Data produced with DirectInput device object enumeration
 //
 typedef struct _GLFWobjenumWin32
@@ -176,7 +177,7 @@ static const char* getDeviceDescription(const XINPUT_CAPABILITIES* xic)
 
 // Lexically compare device objects
 //
-static int compareJoystickObjects(const void* first, const void* second)
+static __cdecl int compareJoystickObjects(const void* first, const void* second)
 {
     const _GLFWjoyobjectWin32* fo = first;
     const _GLFWjoyobjectWin32* so = second;

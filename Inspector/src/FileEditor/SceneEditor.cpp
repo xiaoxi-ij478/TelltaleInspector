@@ -2,6 +2,7 @@
 #include "imgui.h"
 #include "../imstd/imgui_stdlib.h"
 
+#define MessageBoxA(a,b,c,d)puts(b)
 void SceneTask::_render() {
 	if (id == nullptr) {
 		id = select_gameid_dropdown(id);
@@ -16,7 +17,7 @@ void SceneTask::_render() {
 			ImGui::InputText("##", &mpScene->mName);
 			if (ImGui::Button("Save")) {
 				nfdchar_t* fp = 0;
-				if (NFD_SaveDialog("scene", 0, &fp) == NFD_OKAY) {
+				if (NFD_SaveDialog("scene", 0, &fp,nullptr) == NFD_OKAY) {
 					DataStreamFile_PlatformSpecific stream = _OpenDataStreamFromDisc_(fp, WRITE);
 					free(fp);
 					MetaStream s{};

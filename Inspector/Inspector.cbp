@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Inspector" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Inspector" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="rundir" />
+				<Option object_output="obj/Debug/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-ggdb3" />
+					<Add option="-DWL_DEBUG" />
+					<Add option="-DDEBUG" />
+					<Add option="-DDEBUGMODE" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Inspector" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="rundir" />
+				<Option object_output="obj/Release/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-DWL_RELEASE" />
+					<Add option="-DNDEBUG" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="test">
+				<Option output="bin/test" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/test" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option projectLinkerOptionsRelation="1" />
+				<Compiler>
+					<Add option="-ggdb3" />
+				</Compiler>
+				<Linker>
+					<Add library="../TelltaleToolLib/bin/Debug/libTelltaleToolLib.a" />
+				</Linker>
+			</Target>
+			<Target title="test2">
+				<Option output="bin/test2" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/test2" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters='&quot;/home/xiaoxi/Desktop/New Folder 1/skM1_admin.skl&quot;' />
+				<Option projectLinkerOptionsRelation="1" />
+				<Compiler>
+					<Add option="-ggdb3" />
+				</Compiler>
+				<Linker>
+					<Add library="../TelltaleToolLib/bin/Debug/libTelltaleToolLib.a" />
+				</Linker>
+			</Target>
+			<Target title="test3">
+				<Option output="bin/test3" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/test3" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters='&quot;/home/xiaoxi/Desktop/fred/skM1_fred_hair.d3dmesh&quot;' />
+				<Option projectLinkerOptionsRelation="1" />
+				<Compiler>
+					<Add option="-ggdb3" />
+				</Compiler>
+				<Linker>
+					<Add library="../TelltaleToolLib/bin/Debug/libTelltaleToolLib.a" />
+				</Linker>
+			</Target>
+			<Target title="test4">
+				<Option output="bin/test4" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/test4" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters='&quot;/home/xiaoxi/Desktop/adv_beaconTown_meshesPTerrain.d3dmesh&quot;' />
+				<Option projectLinkerOptionsRelation="1" />
+				<Compiler>
+					<Add option="-ggdb3" />
+				</Compiler>
+				<Linker>
+					<Add library="../TelltaleToolLib/bin/Debug/libTelltaleToolLib.a" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-w" />
+			<Add option="-std=c++17" />
+			<Add option="-DBUILDING_INSPECTOR" />
+			<Add option="-DWL_PLATFORM_LINUX" />
+			<Add directory="../TelltaleToolLib" />
+			<Add directory="../vendor/imgui" />
+			<Add directory="../vendor/GLFW/include" />
+			<Add directory="../Walnut/src" />
+			<Add directory="../vendor/glm" />
+		</Compiler>
+		<Linker>
+			<Add library="../TelltaleToolLib/bin/$(TARGET_NAME)/libTelltaleToolLib.a" />
+			<Add library="../vendor/imgui/bin/$(TARGET_NAME)/libImGui.a" />
+			<Add library="../Walnut/bin/$(TARGET_NAME)/libWalnut.a" />
+			<Add library="../vendor/GLFW/bin/$(TARGET_NAME)/libGLFW.a" />
+			<Add library="vulkan" />
+		</Linker>
+		<ExtraCommands>
+			<Add after='mkdir -p &quot;$(PROJECT_DIR)/rundir/_Dev&quot;' />
+			<Add after='cp -r -n -t &quot;$(PROJECT_DIR)/rundir&quot; &quot;$(PROJECT_DIR)/../Release Builds/Dist/imgui.ini&quot; &quot;$(PROJECT_DIR)/../Release Builds/Dist/Information&quot; &quot;$(PROJECT_DIR)/../Release Builds/Dist/LibBin&quot; &quot;$(PROJECT_DIR)/../Release Builds/Dist/UserSettings&quot;' />
+			<Add after='cp -r -n -t &quot;$(PROJECT_DIR)/rundir/_Dev&quot; &quot;$(PROJECT_DIR)/../Release Builds/Dist/Caches&quot; &quot;$(PROJECT_DIR)/../Release Builds/Dist/Database&quot;' />
+			<Mode after="always" />
+		</ExtraCommands>
+		<Unit filename="a.cpp">
+			<Option target="test" />
+		</Unit>
+		<Unit filename="b.cpp">
+			<Option target="test2" />
+		</Unit>
+		<Unit filename="c.cpp">
+			<Option target="test3" />
+		</Unit>
+		<Unit filename="d.cpp">
+			<Option target="test4" />
+		</Unit>
+		<Unit filename="src/FileEditor/AnimationEditor.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/FileEditor/AnyTypeEditor.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/FileEditor/Archive2Editor.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/FileEditor/BankEditor.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/FileEditor/ChoreEditor.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/FileEditor/DialogEditor.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/FileEditor/LuaEditor.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/FileEditor/Mesh/MeshConverter.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/FileEditor/Mesh/MeshEditor.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/FileEditor/MetaStreamEditor.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/FileEditor/PropEditor.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/FileEditor/SceneEditor.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/FileEditor/ShaderEditor.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/FileEditor/TexEditor.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/GameEditor/GameEditor.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/GameEditor/GameEditor.hpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/GameEditor/IntrinsicMath.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/GameEditor/IntrinsicMath.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/ImText/TextEditor.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/ImText/TextEditor.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/InspectorTemplate.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/JobScheduler.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/TelltaleInspector.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/TelltaleInspector.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/Testing.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/entt.hpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/glad.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/glad.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/imstd/imgui_memedit.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/imstd/imgui_stdlib.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/imstd/imgui_stdlib.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/nfd.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/nfd_common.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/nfd_common.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/nfd_gtk.cpp">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/alpha.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/alpha.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/clusterfit.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/clusterfit.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/colourblock.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/colourblock.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/colourfit.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/colourfit.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/colourset.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/colourset.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/config.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/maths.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/maths.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/rangefit.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/rangefit.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/simd.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/simd_float.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/simd_sse.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/simd_ve.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/singlecolourfit.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/singlecolourfit.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/squish.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/squish/squish.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/stb/stb_tunit.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="src/stb/std_image_write.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Extensions>
+			<lib_finder disable_auto="1">
+				<lib name="gtk+-3.0" />
+				<lib name="vulkan" />
+			</lib_finder>
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

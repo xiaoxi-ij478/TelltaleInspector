@@ -9,6 +9,7 @@
 #include "ToolLibrary/Types/D3DMesh.h"
 #include "ToolLibrary/T3/T3Effect.h"
 
+#define MessageBoxA(a,b,c,d)puts(b)
 void MetaStreamSubType::ResetChild() {
 	if (mpChildSub) {
 		mpChildSub->Reset();
@@ -627,8 +628,8 @@ void MetaStreamSubType::render_mcd(MetaClassDescription* mcd, void* pInstance, f
 					ImGui::Text("Texture Sampler State | NOTE: The values only apply to PC versions (D3D11) - ensure the texture platform!");
 					ImGui::Indent(5.0f);
 
-					u32 wrapU = (u8)pStateBlock.InternalGetSamplerState(eSamplerState_WrapU_Value); // 1 NIBBLE 
-					u32 wrapV = (u8)pStateBlock.InternalGetSamplerState(eSamplerState_WrapV_Value); // 1 NIBBLE 
+					u32 wrapU = (u8)pStateBlock.InternalGetSamplerState(eSamplerState_WrapU_Value); // 1 NIBBLE
+					u32 wrapV = (u8)pStateBlock.InternalGetSamplerState(eSamplerState_WrapV_Value); // 1 NIBBLE
 					bool bFiltered = pStateBlock.InternalGetSamplerState(eSamplerState_Filtered_Value) == 0 ? false : true;
 					bool bGC = pStateBlock.InternalGetSamplerState(eSamplerState_GammaCorrect_Value) == 0 ? false : true;//gamma correct
 					signed int mipBias = (signed int)(pStateBlock.InternalGetSamplerState(eSamplerState_MipBias_Value) & 0xFF);//1 BYTE
@@ -650,7 +651,7 @@ void MetaStreamSubType::render_mcd(MetaClassDescription* mcd, void* pInstance, f
 					pStateBlock.InternalSetSamplerState(eSamplerState_GammaCorrect_Value, bGC ? 1 : 0);
 					pStateBlock.InternalSetSamplerState(eSamplerState_Filtered_Value, bFiltered ? 1 : 0);
 
-					//mip bias 
+					//mip bias
 					mipBias = (-acMipBias) << 2;
 					if (mipBias > 127)
 						mipBias = 127;
@@ -925,7 +926,12 @@ void MetaStreamTask::_render() {
 			u32 libVersion = SerializedVersionInfo::RetrieveCompiledVersionInfo(mpType)->mVersionCrc;
 			u32 fileVersion = mStream.mVersionInfo[0].mVersionCrc;
 			if (libVersion != fileVersion) {
-				if (MessageBoxA(0, "WARNING: The file you are opening has a different version than the library supports. This is "
+				puts("WARNING: The file you are opening has a different version than the library supports. This is "
+					"a very common warning and is likely because this app was made using the walking dead definitive series, and "
+					"the file you are opening likely belongs to a game before that. You can, at your risk, try and open it anyway but"
+					" it is possible that either the app with crash (your memory usage will explode!) or it might work. Contact me if you"
+					" want a specific game support for this type of file. Click yes to open anyway.");
+/*				if (MessageBoxA(0, "WARNING: The file you are opening has a different version than the library supports. This is "
 					"a very common warning and is likely because this app was made using the walking dead definitive series, and "
 					"the file you are opening likely belongs to a game before that. You can, at your risk, try and open it anyway but"
 					" it is possible that either the app with crash (your memory usage will explode!) or it might work. Contact me if you"
@@ -938,7 +944,7 @@ void MetaStreamTask::_render() {
 					mbInvalidMS = true;
 					mpType = nullptr;
 					goto bad__;
-				}
+				}*/
 			}
 			MetaOpResult result = PerformMetaSerializeFull(&mStream, mpInstance, mpType);
 			if (result != MetaOpResult::eMetaOp_Succeed) {
@@ -1055,9 +1061,12 @@ void MetaStreamTask::_render() {
 					MessageBoxA(0, "Could not open the output file!", "Error", MB_ICONERROR);
 				}
 				else {
-					if (MessageBoxA(0, "Please note exporting JSON could take a significant amount of time! I have to search the file name database"
+						puts("Please note exporting JSON could take a significant amount of time! I have to search the file name database"
+						" so that file names are not hashes but actual file names! Click OK to continue..");
+/*					if (MessageBoxA(0, "Please note exporting JSON could take a significant amount of time! I have to search the file name database"
 						" so that file names are not hashes but actual file names! Click OK to continue..",
-						"You have been warned lol", MB_ICONINFORMATION) == IDOK) {
+						"You have been warned lol", MB_ICONINFORMATION) == IDOK) {*/
+						{
 						MetaStream_JSON outStream{ MetaStream_JSON::eJSONMode::eCompleteMetaStream };
 						outStream.mbDontDeleteStream = true;
 						outStream.InjectVersionInfo(mStream);
@@ -1079,8 +1088,11 @@ void MetaStreamTask::_render() {
 		ImGui::Text("If you would like to resolve hashes, click here: ");
 		ImGui::SameLine();
 		if (ImGui::Button("Resolve Hashes") && !mbHasResolved) {
-			if (MessageBoxA(0, "Resolving hashes can take time! Are you sure? Resolving hashes will mean all 'Symbol<..> hashes are converted"
-				" mostly to file names and property keys used.", "Time warning", MB_ICONINFORMATION | MB_YESNO) == IDYES) {
+			puts("Resolving hashes can take time! Are you sure? Resolving hashes will mean all 'Symbol<..> hashes are converted"
+				" mostly to file names and property keys used.");
+/*			if (MessageBoxA(0, "Resolving hashes can take time! Are you sure? Resolving hashes will mean all 'Symbol<..> hashes are converted"
+				" mostly to file names and property keys used.", "Time warning", MB_ICONINFORMATION | MB_YESNO) == IDYES) {*/
+			{
 				mbHasResolved = true;
 			}
 		}

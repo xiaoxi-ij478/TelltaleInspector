@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "ToolLibrary/T3/T3Effect.h"
 
+#define MessageBoxA(a,b,c,d)puts(b)
 // ==================================================================================== INCLUDE AND MACROS ====================================================================================
 
 //set to true to make exe only build the .HashDB and then quit.
@@ -45,7 +46,7 @@
 #include "ToolLibrary/MetaInitHelpers.h"
 #include "ToolLibrary/Blowfish.h"
 #include "ToolLibrary/TTArchive2.hpp"
-#include "ToolLibrary/types/SoundReverbDefinition.h"
+#include "ToolLibrary/Types/SoundReverbDefinition.h"
 #include <fstream>
 #include <vector>
 #include <string.h>
@@ -56,9 +57,9 @@
 #include "ToolLibrary/Lua/lua.hpp"
 extern "C" {
 #include "ToolLibrary/Lua/decompile.h"
-#include "ToolLibrary/lua/proto.h"
+#include "ToolLibrary/Lua/proto.h"
 }
-#include <intrin.h>
+//#include <intrin.h>
 #include <filesystem>
 #include "ToolLibrary/FMOD/FSB5.h"
 #include "ToolLibrary/MetaStream_JSON.hpp"
@@ -72,7 +73,7 @@ extern "C" {
 #include "ToolLibrary/Types/AnimOrChore.h"
 #include "ToolLibrary/Base64.h"
 #include "ToolLibrary/T3/T3EffectCache.h"
-#include "ToolLibrary/types/Dialog.h"
+#include "ToolLibrary/Types/Dialog.h"
 #include <imgui_node_editor.h>
 #include "TelltaleInspector.h"
 #include "GameEditor/GameEditor.hpp"
@@ -85,7 +86,7 @@ void SymbolMap::load(const char* path) {
 	MetaStream stream{};
 	stream.Open(&ds, MetaStreamMode::eMetaStream_Read, {});
 	stream.mbDontDeleteStream = true;
-		
+
 	u32 magic{};
 	char buf[0x7FF + 1];
 	memset(buf, 0, 0x7FF + 1);
@@ -106,7 +107,7 @@ void SymbolMap::load(const char* path) {
 		}
 	}
 
-	
+
 }
 
 void SymbolMap::save(const char* path) {
@@ -454,13 +455,13 @@ public:
 		DataStreamFileDisc* dataArchive = OpenDataStreamFromDisc("TTL_Inspector200_ALL_data.ttarch2", READ);
 		bool bDebug = false;
 #ifdef DEBUGMODE
-		//bDebug = true; skip for now to test archife works
+		bDebug = true; //skip for now to test archife works
 #endif
 		if (bDebug || dataArchive->IsInvalid()) {
 			delete dataArchive;
 			if (!bDebug)
 				TTL_Log("WARN: Attempting to use database folders instead of database archive as it could be found");
-			DataStreamFileDisc* db = _OpenDataStreamFromDisc("./_Dev/Database/ToolLibrary.HashDB", READ);
+			DataStreamFileDisc* db = _OpenDataStreamFromDisc("./_Dev/ToolLibrary.HashDB", READ);
 			if (db->IsInvalid()) {
 				delete db;
 				MessageBoxA(NULL, "Could not locate the hash database "
@@ -469,10 +470,10 @@ public:
 			}
 			TelltaleToolLib_SetGlobalHashDatabaseFromStream(db);
 			TTL_Log("Using TelltaleToolLib(modified) v%s\n", TelltaleToolLib_GetVersion());
-			if (_setmaxstdio(8192) == -1) {
+			/*if (_setmaxstdio(8192) == -1) {
 				MessageBoxA(NULL, "Could not set max stdio limit, please contact me with your machine information."
 					" This will mean that you cannot add over ~500 custom files to an archive at a time!", "Error", MB_ICONERROR);
-			}
+			}*/
 			std::filesystem::path dbs = std::filesystem::current_path();
 			dbs += "/_Dev/Database";
 			int numVers = TelltaleToolLib_SetProxyVersionDatabases(dbs.string().c_str());
@@ -564,8 +565,11 @@ public:
 				sRuntime.settings.mbShownIntroMessage = true;
 			}
 			else {
-				MetaStream stream{};
+				// ORDER MATTERS!
+				// otherwise stream will be freed first, causing fstream to become
+				// base class object which means causing a pure virtual call
 				DataStreamFileDisc fstream = _OpenDataStreamFromDisc_(settingsPath.string().c_str(), READ);
+				MetaStream stream{};
 				stream.Open(&fstream, MetaStreamMode::eMetaStream_Read, {});
 				stream.mbDontDeleteStream = true;
 				if (stream.mbErrored) {
@@ -582,24 +586,27 @@ public:
 #endif
 			}
 		}
-		
+
 		//SHOW THE USER INTRO MESSAGE IF NEEDED
 		if(!sRuntime.settings.mbShownIntroMessage){
-			ULONGLONG start = GetTickCount64();
+			time_t start = time(nullptr);
 #define WAIT_TIME 30
-#define WAIT_TIME_S "30" 
-			while((GetTickCount64() - start) < WAIT_TIME * 1000)
+#define WAIT_TIME_S "30"
+			while((time(nullptr) - start) < WAIT_TIME * 1000)
 			{
 				MessageBoxA(0, "You can exit this after " WAIT_TIME_S " seconds. It is vital you read all these message boxes before any sort of modding."
 					" This is your first use of this app (or version of it), in which it is designed to let you mod games by Telltale Games (games preceding and not including The Expanse). "
 					APP_HELP_DESC
 					, "Welcome to the Telltale Inspector", MB_ICONINFORMATION);
 			}
-
-			if(MessageBoxA(0, "CONTACT ME! Any bugs (I am aware of lots) or queries, message me on the modding discord"
-				"  tagging @lucassaragosa. Please click YES to get an invite to the discord.", "Contact information", MB_YESNO) == IDYES){
+puts("CONTACT ME! Any bugs (I am aware of lots) or queries, message me on the modding discord"
+				"  tagging @lucassaragosa. Please click YES to get an invite to the discord.");
+			/*if(
+				MessageBoxA(0, "CONTACT ME! Any bugs (I am aware of lots) or queries, message me on the modding discord"
+				"  tagging @lucassaragosa. Please click YES to get an invite to the discord.", "Contact information", MB_YESNO) == IDYES
+			){
 				ShellExecuteA(NULL, "open", "https://discord.com/invite/HqpnTenqwp", NULL, NULL, SW_SHOWNORMAL);
-			}
+			}*/
 			MessageBoxA(0, "Last bit of information! This was made by discord @lucassaragosa and any questions ask me staff modders on the discord."
 				" It is NOT a good idea to convert files between different games using this tool. Your files will likely break the game.", "!!", MB_ICONINFORMATION);
 			MessageBoxA(0, "BE WARNED! This app is in continual development and will have bugs. Please donate to keep interest! HAPPY MODDING", "WARNING!", MB_ICONINFORMATION);
@@ -688,7 +695,7 @@ public:
 void LogHook(const char* const _Fmt, va_list va) {
 	char buf[1024]{ 0 };
 	int n;
-	if((n=vsprintf_s(buf, _Fmt, va))>0){
+	if((n=vsprintf(buf, _Fmt, va))>0){
 		bool ex = n > 0 && buf[n - 1] != '\n';
 		if (ex)
 			printf("\n");
@@ -703,25 +710,23 @@ void LogHook(const char* const _Fmt, va_list va) {
 class ContactTask : public InspectorTask {
 
 	virtual void _render() override {
-		const char* tt = "https://discord.gg/SPdn5yZr6M";
-		const char* mcsm = "https://discord.gg/AzEfQCNj9S";
 		ImGui::Text("Contact me on discord at: lucassaragosa#0152");
 		ImGui::NewLine();
 		ImGui::Text("Contact me on instagram at: lukassaragosa");
 		ImGui::NewLine();
 		ImGui::Text("Why not join the Telltale Community?");
 		if (ImGui::Button("Modding Discord")) {
-			ShellExecuteA(NULL, "open", tt, NULL, NULL, SW_SHOWNORMAL);
+			system("open https://discord.gg/SPdn5yZr6M");
 		}
 		ImGui::NewLine();
 		ImGui::Text("Fan of MCSM? Join the MCSM rebuilt server run by my team! Mod talk there too:");
 		if (ImGui::Button("MCSM Rebuilt Discord")) {
-			ShellExecuteA(NULL, "open", mcsm, NULL, NULL, SW_SHOWNORMAL);
+			system("open https://discord.gg/AzEfQCNj9S");
 		}
 		ImGui::NewLine();
 		ImGui::Text("Thank you for downloading my tool. Please follow my github!! (code there aswell): ");
 		if (ImGui::Button("My Github")) {
-			ShellExecuteA(NULL, "open", "https://github.com/LucasSaragosa", NULL, NULL, SW_SHOWNORMAL);
+			system("open https://github.com/LucasSaragosa");
 		}
 		ImGui::NewLine();
 		ImGui::Text("Special thanks: Simon Pinfold (FSB5 format), RandomTBush (some D3DMesh old formats), David M & Violet, Telltale Games");
@@ -815,7 +820,7 @@ void TypeTask<T>::_render() {
 			if (imported) {
 				if (ImGui::Button("Save File")) {
 					nfdchar_t* p{};
-					if (NFD_SaveDialog(mpTypeDesc->mpExt, 0, &p) == NFD_OKAY) {
+					if (NFD_SaveDialog(mpTypeDesc->mpExt, 0, &p,nullptr) == NFD_OKAY) {
 						std::string path = p;
 						free(p);
 						DataStreamFile_PlatformSpecific in = _OpenDataStreamFromDisc_(path.c_str(), WRITE);
@@ -940,14 +945,14 @@ void walkthrough_files(const char* game, const char* id) {
 
  				if (temp.mVersionInfo.size() == 0) {
 					getname(name, arch, &file, archp);
-					emptyUnkFiles.push_back(_STD move(name));
+					emptyUnkFiles.push_back(std::move(name));
 				}
 				else {
 					u64 first = temp.mVersionInfo[0].mTypeSymbolCrc;
 					bool found = TelltaleToolLib_FindMetaClassDescription_ByHash(first) ? 1 : 0;
 					if (!found) {
 						getname(name, arch, &file, archp);
-						unknownTypes.push_back(_STD move(name));
+						unknownTypes.push_back(std::move(name));
 					}
 					else if(temp.mVersionInfo.size() > 1) {
 						for (int i = 1; i < temp.mVersionInfo.size(); i++) {
@@ -955,7 +960,7 @@ void walkthrough_files(const char* game, const char* id) {
 							found = TelltaleToolLib_FindMetaClassDescription_ByHash(first) ? 1 : 0;
 							if (!found) {
 								getname(name, arch, &file, archp);
-								unknowns[first].push_back(_STD move(name));
+								unknowns[first].push_back(std::move(name));
 							}
 						}
 					}
@@ -1021,9 +1026,9 @@ void dump_game_classes_init_code(const char* id) {
 			;// continue;
 		out << "\n\n";
 		std::string niceNamee = MetaVersion_ConvertTypeName((const char*)pClass->mpTypeInfoName);
-		if (niceNamee._Starts_with("DCArray") || niceNamee._Starts_with("List") || niceNamee._Starts_with("Map") || niceNamee._Starts_with("Set")
-			|| niceNamee._Starts_with("DArray") || niceNamee._Starts_with("Deque") || niceNamee._Starts_with("Handle")
-			|| niceNamee._Starts_with("KeyframedValue") || niceNamee._Starts_with("AnimatedValueInterface")) {
+		if (starts_with(niceNamee.c_str(),"DCArray") || starts_with(niceNamee.c_str(),"List") || starts_with(niceNamee.c_str(),"Map") || starts_with(niceNamee.c_str(),"Set")
+			|| starts_with(niceNamee.c_str(),"DArray") || starts_with(niceNamee.c_str(),"Deque") || starts_with(niceNamee.c_str(),"Handle")
+			|| starts_with(niceNamee.c_str(),"KeyframedValue") || starts_with(niceNamee.c_str(),"AnimatedValueInterface")) {
 			con << "\t\t\t// " << niceNamee << "\n";
 			continue;
 		}
@@ -1045,7 +1050,7 @@ void dump_game_classes_init_code(const char* id) {
 					out << "\t\t\tFIRSTMEM";
 				else
 					out << "\t\t\tNEXTMEM";
-				if (member._Starts_with("Baseclass") || member.find('[') != std::string::npos) {
+				if (starts_with(member.c_str(),"Baseclass") || member.find('[') != std::string::npos) {
 					out << "1(" << cur << ", \"" << member << "\", " << member << ", ";
 					if (pPrevious == nullptr) {
 						if (pMember->mpNextMember == -1) {
@@ -1234,7 +1239,7 @@ void _CreateHashDatabase(){
 
 void TestStuff();
 
-Walnut::Application* Walnut::CreateApplication(int argc, char** argv)       
+Walnut::Application* Walnut::CreateApplication(int argc, char** argv)
 {
 	//PackageInspectorFiles();
 	//exit(1);
@@ -1335,8 +1340,8 @@ Walnut::Application* Walnut::CreateApplication(int argc, char** argv)
 			}else if(!sRuntime.settings.mbShowConsole && ImGui::MenuItem("Show Console Window")){
 				sRuntime.settings.mbShowConsole = true;
 			}
-			if (ImGui::MenuItem("CRT: Dump Memory Leaks"))
-				_CrtDumpMemoryLeaks();
+			/*if (ImGui::MenuItem("CRT: Dump Memory Leaks"))
+				_CrtDumpMemoryLeaks();*/
 			if (ImGui::MenuItem("Exit"))
 			{
 				app->Close();
@@ -1371,7 +1376,7 @@ Walnut::Application* Walnut::CreateApplication(int argc, char** argv)
 		}
 		if (ImGui::BeginMenu("Open")) {
 			if (ImGui::MenuItem("Open Meta Stream File(s)")) {
-				tryingopen = true;		
+				tryingopen = true;
 			}
 			if (ImGui::MenuItem("Open Full Game Editor")) {
 				if(sRuntime.current_editor_task){

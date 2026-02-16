@@ -3,6 +3,7 @@
 #include "../squish/squish.h"
 #include "../imstd/imgui_stdlib.h"
 
+#define MessageBoxA(a,b,c,d)puts(b)
 inline u32 rotate_left(u32 i, u32 bits) {
 	return (i << bits) | (i >> (32 - bits));
 }

@@ -6,6 +6,7 @@
 #include "ToolLibrary/T3/T3Effect.h"
 #include "ToolLibrary/TTArchive2.hpp"
 
+#define MessageBoxA(a,b,c,d)puts(b)
 struct _CmpBucket {
 
 	inline bool operator()(const LoadedBucket& l, const LoadedBucket& r) {
@@ -201,8 +202,8 @@ void ShaderTask::_render() {
 					MessageBoxA(0, "The effect package name must end in .T3FXPACK! Change the name before exporting.", "Name error", MB_ICONERROR);
 				}
 				else {
-					bool bAsArchive = MessageBoxA(0, "Would you like to export it as an archive (.TTARCH2, replacable in Archives) - else it will be a plain shader pack (.T3FXPACK)?",
-						"Output Format", MB_YESNO) == IDYES;
+					bool bAsArchive = false;//MessageBoxA(0, "Would you like to export it as an archive (.TTARCH2, replacable in Archives) - else it will be a plain shader pack (.T3FXPACK)?",
+						//"Output Format", MB_YESNO) == IDYES;
 					nfdchar_t* p{};
 					if (NFD_PickFolder(0, &p, L"Select output folder")) {
 						std::string sname = name;
@@ -377,7 +378,7 @@ void ShaderTask::_render() {
 					ImGui::InputText("##matc", &mEditingBucket.mMatCRC);
 					ImGui::Text("Static Effect Features");
 					int nSt = 0;
-					for (int i = mLocalCacheContext.mpVersionDatabase->mFirstStaticFeature; i < 
+					for (int i = mLocalCacheContext.mpVersionDatabase->mFirstStaticFeature; i <
 						mLocalCacheContext.mpVersionDatabase->mFirstStaticFeature + mLocalCacheContext.mpVersionDatabase->mStaticFeaturesCount; i++){
 						if (mEditingBucket.mParams.mStaticFeatures[(T3EffectFeature)(i)]) {
 							ImGui::PushID(i);
@@ -398,7 +399,7 @@ void ShaderTask::_render() {
 						for (int i = mLocalCacheContext.mpVersionDatabase->mFirstStaticFeature; i <
 							mLocalCacheContext.mpVersionDatabase->mFirstStaticFeature + mLocalCacheContext.mpVersionDatabase->mStaticFeaturesCount; i++) {
 							if (ImGui::Selectable(mLocalCacheContext.mpVersionDatabase->mFeatures[i].mName)) {
-								mEditingBucket.newStaticFeat = i;   
+								mEditingBucket.newStaticFeat = i;
 							}
 						}
 						ImGui::EndCombo();
@@ -499,7 +500,7 @@ void ShaderTask::_render() {
 								bucket.mEffect = mEditingBucket.mEffect;
 								bucket.mParams = mEditingBucket.mParams;
 								EffectFeatures tmpExp = bucket.mParams.mStaticFeatures;
-								bucket.mBuiltName = T3::BuildName(mLocalCacheContext, bucket.mEffect, tmpExp, 
+								bucket.mBuiltName = T3::BuildName(mLocalCacheContext, bucket.mEffect, tmpExp,
 									EffectQualities(bucket.mParams.mQuality, mLocalCacheContext.mpVersionDatabase),
 									bucket.mParams.mMaterialCrc = result, false, "");
 								selectedShaderNode = selectedVariant = -1;
@@ -606,7 +607,7 @@ void ShaderTask::_render() {
 								fp += "/ComputeShader.bin";
 								DataStreamFileDisc out = _OpenDataStreamFromDisc_(fp.c_str(), WRITE);
 								mShaders[mpOpenPass->mShader[0]].mpShaderData->Transfer(&out, 0, mShaders[mpOpenPass->mShader[0]].mLoadedBinSize);
-								MessageBoxA(0, "Successfully extracted the raw shader binary! This may include platform specific parameter headers.", "Success", MB_ICONINFORMATION);	
+								MessageBoxA(0, "Successfully extracted the raw shader binary! This may include platform specific parameter headers.", "Success", MB_ICONINFORMATION);
 								free(outp);
 							}
 						}
@@ -663,7 +664,7 @@ void ShaderTask::_render() {
 					ImGui::InputText("##matc", &mEditingBucket.mMatCRC);
 					ImGui::Text("Static Effect Features");
 					int nSt = 0;
-					for (int i = mLocalCacheContext.mpVersionDatabase->mFirstStaticFeature; 
+					for (int i = mLocalCacheContext.mpVersionDatabase->mFirstStaticFeature;
 						i < mLocalCacheContext.mpVersionDatabase->mFirstStaticFeature+ mLocalCacheContext.mpVersionDatabase->mStaticFeaturesCount; i++) {
 						if (mEditingBucket.mParams.mStaticFeatures[(T3EffectFeature)(i)]) {
 							ImGui::PushID(i);
@@ -818,7 +819,7 @@ void ShaderTask::_render() {
 			ImGui::Text("Add Static Feature:");
 			ImGui::SameLine();
 			if (ImGui::BeginCombo("##stccm", mLocalCacheContext.mpVersionDatabase->mFeatures[mNewFilterFeature].mName)) {
-				for (int i = mLocalCacheContext.mpVersionDatabase->mFirstStaticFeature; i < 
+				for (int i = mLocalCacheContext.mpVersionDatabase->mFirstStaticFeature; i <
 					mLocalCacheContext.mpVersionDatabase->mFirstStaticFeature+ mLocalCacheContext.mpVersionDatabase->mStaticFeaturesCount; i++) {
 					if (ImGui::Selectable(mLocalCacheContext.mpVersionDatabase->mFeatures[i].mName)) {
 						mNewFilterFeature = i;
@@ -946,10 +947,8 @@ void ShaderTask::AsyncDoSave(void* inst, void* a, void* b) {
 	bool bExportArchive = (u64)a >> 63;
 
 	if (bExportArchive) {
-		char buf1[MAX_PATH];
-		char buf2[MAX_PATH];
-		GetTempPathA(MAX_PATH, buf1);
-		GetTempFileNameA(buf1, "create_fxpack_ttlib", 0, buf2);
+		char buf2[PATH_MAX];
+		strcpy(buf2,"/tmp/create_fxpack_ttlib");
 		disc = DataStreamFileDisc(PlatformSpecOpenFile(buf2, WRITE), DataStreamMode::eMode_Write);
 		pFxStream = &disc;
 	}
@@ -957,7 +956,7 @@ void ShaderTask::AsyncDoSave(void* inst, void* a, void* b) {
 	task.mpProgressString.store((uintptr_t)"Writing package");
 
 	TelltaleToolLib_SetBlowfishKey((const char*)b);
-	
+
 	int version = task.importedVersion;
 	if (version == 0) {
 		task.mpProgressString.store((uintptr_t)"Shader pack version mismatch");

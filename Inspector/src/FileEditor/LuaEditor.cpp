@@ -4,9 +4,10 @@
 #include "ToolLibrary/Lua/lua.hpp"
 extern "C" {
 #include "ToolLibrary/Lua/decompile.h"
-#include "ToolLibrary/lua/proto.h"
+#include "ToolLibrary/Lua/proto.h"
 }
 
+#define MessageBoxA(a,b,c,d)puts(b)
 #define toproto(L,i) getproto(L->top+(i))
 
 bool getter(void* data, int index, const char** output)
@@ -29,7 +30,7 @@ bool getter(void* data, int index, const char** output)
 		typeStr = "Standard Lua Source";
 	else
 		typeStr = "??";
-	sprintf_s(workBuf, "%s [%s]", ((imported_file*)data)[index].mName.c_str(), typeStr);
+	sprintf(workBuf, "%s [%s]", ((imported_file*)data)[index].mName.c_str(), typeStr);
 	return true;
 }
 
@@ -43,7 +44,10 @@ void LuaTask::import_in_singlefile(const std::filesystem::path& phys, exitstrat&
 			std::stringstream tmp{};
 			tmp << "Found a file name conflict. Replace(yes), ignore(no), cancel(select what I do for any more conflicts)? ";
 			tmp << newfile.mName;
-			int res = MessageBoxA(0, tmp.str().c_str(), "Name conflict", MB_ICONINFORMATION | MB_YESNOCANCEL);
+			puts(tmp.str().c_str());
+			strat = accept_all;
+			newfile.mDiskPath = phys;
+			/*int res = MessageBoxA(0, tmp.str().c_str(), "Name conflict", MB_ICONINFORMATION | MB_YESNOCANCEL);
 			if (res == IDCANCEL) {
 				if (MessageBoxA(0, "Replace all (yes), ignore all (no)", "Select", MB_ICONINFORMATION | MB_YESNO) == IDYES)
 					strat = accept_all;
@@ -54,11 +58,11 @@ void LuaTask::import_in_singlefile(const std::filesystem::path& phys, exitstrat&
 			if (res == IDYES) {
 				newfile.mDiskPath = phys;
 				return;
-			}
+			}*/
 			continue;
 		}
 	}
-	mFiles.push_back(_STD move(newfile));
+	mFiles.push_back(std::move(newfile));
 }
 
 bool LuaTask::is_raw_script(char* buffer, u64 size) {
@@ -95,7 +99,7 @@ int  LuaTask::writer(lua_State* L, const void* p, size_t size, void* u)
 }
 
 char* LuaTask::luadec_strdup(const char* src) {
-	return ((src) ? _strdup(src) : NULL);
+	return ((src) ? strdup(src) : NULL);
 }
 
 bool LuaTask::do_luac(const char* Chunk, DataStream* pOut, char* pIn, u64 insize, bool bIsCompile) {
@@ -150,7 +154,7 @@ bool LuaTask::convert_to_scriptn(DataStream* pIn, DataStream* pOut, const std::s
 		}
 	}
 	if (alreadyEnc){
-		//ensure its compiled. 
+		//ensure its compiled.
 		//1. decrypt
 		u32 outz{ 0 };
 		u8* res = lenc ? TelltaleToolLib_DecryptLencScript((u8*)buffer, (u32)inSize, &outz) :

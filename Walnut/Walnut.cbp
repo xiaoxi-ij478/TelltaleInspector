@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Walnut" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Walnut" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Debug/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-ggdb3" />
+					<Add option="-DWL_DEBUG" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Walnut" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Release/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-DWL_RELEASE" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-w" />
+			<Add option="-std=c++17" />
+			<Add option="-DWL_PLATFORM_LINUX" />
+			<Add directory="src" />
+			<Add directory="../vendor/GLFW/include" />
+			<Add directory="../vendor/imgui" />
+			<Add directory="../vendor/stb_image" />
+			<Add directory="../vendor/glm" />
+		</Compiler>
+		<Linker>
+			<Add library="GLFW" />
+			<Add library="ImGui" />
+			<Add directory="../vendor/imgui/bin/Debug/$(TARGET_NAME)" />
+			<Add directory="../vendor/GLFW/bin/Debug/$(TARGET_NAME)" />
+		</Linker>
+		<Unit filename="src/Walnut/Application.cpp" />
+		<Unit filename="src/Walnut/Application.h" />
+		<Unit filename="src/Walnut/EntryPoint.h" />
+		<Unit filename="src/Walnut/ImGui/ImGuiBuild.cpp" />
+		<Unit filename="src/Walnut/Image.cpp" />
+		<Unit filename="src/Walnut/Image.h" />
+		<Unit filename="src/Walnut/Input/Input.cpp" />
+		<Unit filename="src/Walnut/Input/Input.h" />
+		<Unit filename="src/Walnut/Input/KeyCodes.h" />
+		<Unit filename="src/Walnut/Layer.h" />
+		<Unit filename="src/Walnut/Random.cpp" />
+		<Unit filename="src/Walnut/Random.h" />
+		<Unit filename="src/Walnut/Timer.h" />
+		<Extensions />
+	</Project>
+</CodeBlocks_project_file>

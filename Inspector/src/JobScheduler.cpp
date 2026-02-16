@@ -38,7 +38,7 @@ JobScheduler* JobScheduler::mpScheduler{NULL};
 
 JobScheduler::JobScheduler()
 {
-	sem = CreateSemaphoreA(0, 0, LONG_MAX, 0);
+	sem_init(&sem,0,0);
 	std::atomic_bool* pg = new std::atomic_bool(true);
 	for (int i = 0; i < 6; i++) {
 		threadPool.push_back(std::thread(ThreadProc, this, i, pg));
@@ -99,7 +99,7 @@ int JobScheduler::PostJob(InspectorTask* pTask, Job job)
 		pendingJobs.push(std::move(job));
 		aliveJobs.push_back(handle);
 	}
-	ReleaseSemaphore(sem, 1, 0);
+	sem_post(&sem);
 	return handle;
 }
 
@@ -117,11 +117,18 @@ void JobScheduler::ThreadProc(JobScheduler* me, int threadIndex, std::atomic_boo
 	char s[2]{ 'a',0 };
 	s[0] += threadIndex;
 	sprintf(tmp, "%u%s", 0, s);
-	DWORD curThread = GetCurrentThreadId();//platformmulti fix maybe
-	SetThreadNameA(curThread, tmp);
+	pthread_t curThread = pthread_self();//platformmulti fix maybe
+	pthread_setname_np(curThread, tmp);
 	TTL_Log("Thread %s[0x%X] start has signaled\n", tmp, curThread);
 	while (pRunning->load()) {
-		if (WaitForSingleObject(me->sem, 100) == WAIT_OBJECT_0) {
+		struct timespec ts;
+		clock_gettime(CLOCK_REALTIME, &ts);
+		ts.tv_nsec+=100*1000000;
+		if(ts.tv_nsec>=1000000000) {
+			ts.tv_sec++;
+			ts.tv_nsec-=1000000000;
+		}
+		if (!sem_timedwait(&me->sem, &ts)) {
 			Job job{};
 			{
 				std::lock_guard<std::mutex> _l(me->lock);
